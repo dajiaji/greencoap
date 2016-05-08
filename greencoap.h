@@ -14,11 +14,12 @@ extern "C" {
 typedef enum gcoap_status_t {
   GCOAP_OK = 0,
   GCOAP_ERR_INVALID_ARGUMENT = -1,
-  GCOAP_ERR_INVALID_CALL = -2,
-  GCOAP_ERR_SYNTAX = -3,
-  GCOAP_ERR_SYSTEM = -4,
-  GCOAP_ERR_INTERNAL = -5,
-  GCOAP_ERR_UNKNOWN = -6,
+  GCOAP_ERR_LIMIT = -2,
+  GCOAP_ERR_INVALID_CALL = -3,
+  GCOAP_ERR_SYNTAX = -4,
+  GCOAP_ERR_SYSTEM = -5,
+  GCOAP_ERR_INTERNAL = -6,
+  GCOAP_ERR_UNKNOWN = -7,
 } gcoap_status_t;
 
 /**

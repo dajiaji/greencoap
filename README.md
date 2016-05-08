@@ -12,7 +12,7 @@ Features:
 
 ```c
 
-char* buf[2048] = {};
+char buf[2048] = {};
 
 // How to use gcoap_serializer.
 gcoap_serializer* s = NULL;
@@ -25,7 +25,7 @@ gcoap_serializer_add_opt(s, O_URI_PATH, "/temperature", sizeof("/temperature")-1
 
 // How to use gcoap_parser.
 gcoap_parser* p = NULL;
-gcoap_parser_init(&p, malloc(gcoap_parser_size(), gcoap_parser_size());
+gcoap_parser_init(&p, malloc(gcoap_parser_size()), gcoap_parser_size());
 gcoap_parser_exec(p, buf, 2048);
 
 printf("\n", );
