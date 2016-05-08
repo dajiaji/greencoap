@@ -9,7 +9,7 @@ extern "C" {
 #include <assert.h>
 #include <string.h>
 
-#define GCOAP_COAP_VERSION (1 << 30)
+#define GCOAP_COAP_VER (1 << 30)
 
 #define GCOAP_TRUE 1
 #define GCOAP_FALSE 0
@@ -55,6 +55,7 @@ struct gcoap_serializer {
   char* buf;
   size_t cursor;
   gcoap_serializer_state_t state;
+  uint32_t sum_of_delta;
 };
 
 /**
