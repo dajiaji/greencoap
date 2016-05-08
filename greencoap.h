@@ -11,7 +11,7 @@ extern "C" {
 /**
  * Status codes for greencoap APIs.
  */
-enum gcoap_status_t {
+typedef enum gcoap_status_t {
   GCOAP_OK = 0,
   GCOAP_ERR_INVALID_ARGUMENT = -1,
   GCOAP_ERR_INVALID_CALL = -2,
@@ -19,24 +19,17 @@ enum gcoap_status_t {
   GCOAP_ERR_SYSTEM = -4,
   GCOAP_ERR_INTERNAL = -5,
   GCOAP_ERR_UNKNOWN = -6,
-};
-
-/**
- * CoAP version numbers.
- */
-enum gcoap_ver_t {
-  V_1 = 1 << 30,
-};
+} gcoap_status_t;
 
 /**
  * CoAP message types.
  */
-enum gcoap_type_t {
+typedef enum gcoap_type_t {
   T_CON = 0,
   T_NON = 1 << 28,
   T_ACK = 2 << 28,
   T_RST = 3 << 28,
-};
+} gcoap_type_t;
 
 /**
  * CoAP message codes.
@@ -99,65 +92,90 @@ typedef enum gcoap_opt_number_t {
 } gcoap_opt_number_t;
 
 /** CoAP serializer */
-typedef struct gcoap_serializer_t gcoap_serializer_t;
+typedef struct gcoap_serializer gcoap_serializer;
 
 /** CoAP parser */
-typedef struct gcoap_parser_t gcoap_parser_t;
+typedef struct gcoap_parser gcoap_parser;
 
 /**
- * Create a CoAP serializer.
+ * Create a CoAP serializer (gcoap_serializer) with fixed size memory space.
  */
-int gcoap_serializer_create(gcoap_serializer_t** s);
+int gcoap_serializer_init(gcoap_serializer** s, void* buf, size_t len);
 
 /**
- * Create a CoAP serializer with fixed memory space.
+ * Initialize the CoAP serializer with fixed size write buffer.
  */
-int gcoap_fixed_size_serializer_create(gcoap_serializer_t** s, const char* buf,
-                                       size_t len);
+int gcoap_serializer_begin(gcoap_serializer* s, char* buf, size_t len);
 
 /**
- * Destroy the CoAP serializer.
+ * Set a CoAP header and a token.
  */
-int gcoap_serializer_destroy(gcoap_serializer_t* s);
+int gcoap_serializer_set_header(gcoap_serializer* s, uint32_t header,
+                                const char* token, uint8_t token_len);
 
 /**
- * Initialize the CoAP serializer.
+ * Add a (opaque, string, etc.) option.
  */
-int gcoap_serializer_init(gcoap_serializer_t* s, uint32_t header,
-                          const char* token, uint8_t token_len,
-                          const char* payload, size_t payload_len);
-
-/**
- * Add an option to the CoAP serializer.
- */
-int gcoap_serializer_add_opt(gcoap_serializer_t* s, gcoap_opt_number_t opt_no,
+int gcoap_serializer_add_opt(gcoap_serializer* s, gcoap_opt_number_t opt,
                              const char* val, size_t len);
 
 /**
- * Serialize a CoAP message.
+ * Add an empty option.
  */
-int gcoap_serializer_exec(gcoap_serializer_t* s, char* buf, size_t len);
+int gcoap_serializer_add_opt_empty(gcoap_serializer* s, gcoap_opt_number_t opt);
 
 /**
- * Create a CoAP parser.
+ * Add a uint option.
  */
-int gcoap_parser_create(gcoap_parser_t** p);
+int gcoap_serializer_add_opt_uint(gcoap_serializer* s, gcoap_opt_number_t opt,
+                                  uint32_t val);
 
 /**
- * Create a CoAP parser with fixed memory space.
+ * Set a payload.
  */
-int gcoap_fixed_size_parser_create(gcoap_parser_t** p, const char* buf,
-                                   size_t len);
+int gcoap_serializer_set_payload(gcoap_serializer* s, const char* buf,
+                                 size_t len);
 
 /**
- * Destroy the CoAP parser.
+ * Create a CoAP parser (gcoap_parser) with fixed size memory space.
  */
-int gcoap_parser_destroy(gcoap_parser_t* p);
+int gcoap_parser_init(gcoap_parser** p, const char* buf, size_t len);
 
 /**
  * Parse a given buffer as a CoAP message.
  */
-int gcoap_parser_exec(gcoap_parser_t* p, const char* buf, size_t len);
+int gcoap_parser_exec(gcoap_parser* p, const char* buf, size_t len);
+
+/**
+ * Get the CoAP message type.
+ */
+int gcoap_parser_get_type(const gcoap_parser* p, gcoap_type_t* type);
+
+/**
+ * Get the CoAP message code.
+ */
+int gcoap_parser_get_code(const gcoap_parser* p, gcoap_code_t* code);
+
+/**
+ * Get the value of path.
+ */
+int gcoap_parser_get_path(const gcoap_parser* p, const char** buf, size_t* len);
+
+/**
+ * Get a CoAP message payload.
+ */
+int gcoap_parser_get_payload(const gcoap_parser* p, const char** buf,
+                             size_t* len);
+
+/**
+ * Get the size of gcoap_serializer.
+ */
+size_t gcoap_serializer_size();
+
+/**
+ * Get the size of gcoap_parser.
+ */
+size_t gcoap_parser_size();
 
 #ifdef __cplusplus
 }

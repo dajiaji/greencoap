@@ -5,23 +5,22 @@ GreenCoAP is a CoAP (RFC7252: The Constrained Application Protocol) serializer/p
 Features:
 
   * Support RFC7252. <http://tools.ietf.org/html/rfc7252>
-  * Support static memory allocation. (Can work without malloc.)
+  * Support static memory allocation. (No need to use malloc.)
   * No dependencies.
 
 ## Usage
 
 ```c
-char workspace[512] = {};
-char send_buf[2048] = {};
-gcoap_serializer_t* s = NULL;
+char* buf[2048] = {};
+gcoap_serializer* s = gcoap_serializer_init(malloc(gcoap_serializer_size()), gcoap_serializer_size());
+gcoap_parser* p = gcoap_parser_init(malloc(gcoap_parser_size(), gcoap_serializer_size());
 
 // How to use the gcoap_serializer_t.
-gcoap_serializer_create(&s, workspace, 512);
-gcoap_serializer_init(s, T_CON | C_GET, "token", sizeof("token")-1, NULL, 0);
-gcoap_serializer_add_opt(s, O_URI_HOST, "example.com", sizeof("example.com")-1);
-gcoap_serializer_add_opt_uint(s, O_URI_PORT, 5683);
+gcoap_serializer_begin(s, buf, 2048);
+gcoap_serializer_set_header(s, T_CON | C_GET, "token", sizeof("token")-1);
+//gcoap_serializer_add_opt(s, O_URI_HOST, "example.com", sizeof("example.com")-1);
+//gcoap_serializer_add_opt_uint(s, O_URI_PORT, 5683);
 gcoap_serializer_add_opt(s, O_URI_PATH, "/temperature", sizeof("/temperature")-1);
-gcoap_serializer_exec(s, send_buf, 2048);
 
 // How to use the gcoap_parser_t.
 gcoap_parser_create(&p, workspace, 512);

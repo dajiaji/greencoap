@@ -9,11 +9,17 @@ extern "C" {
 #include <assert.h>
 #include <string.h>
 
+#define GCOAP_COAP_VERSION (1 << 30)
+
 #define GCOAP_TRUE 1
 #define GCOAP_FALSE 0
 
 #define GCOAP_CAPACITY_VARIABLE 0
+
+#define GCOAP_LEN_HEADER 4
 #define GCOAP_MAXLEN_TOKEN 8
+
+#define GCOAP_SIZEOF_SERIALIZER_ sizeof(struct gcoap_serializer_t)
 
 #define IS_REQUEST_(msg_type) (((msg_type)&0x1001) == 1)
 
@@ -22,105 +28,38 @@ extern "C" {
  */
 typedef uint8_t gcoap_bool_t;
 
+typedef enum gcoap_serializer_state_t {
+  GCOAP_S_STATE_INIT = 0,
+  GCOAP_S_STATE_BUFFER_ASSIGNED,
+} gcoap_serializer_state_t;
+
 /**
- * General buffer structure.
+ * General buffer.
  */
 typedef struct gcoap_buf_t {
-  size_t len;
+  uint16_t len;
   const char* val;
 } gcoap_buf_t;
 
 /**
- * CoAP option structure.
- */
-typedef struct gcoap_opt_t {
-  uint32_t delta;
-  uint32_t len;
-  const char* val;
-} gcoap_opt_t;
-
-/**
  * CoAP serializer.
  */
-struct gcoap_serializer_t {
-  size_t capacity;
+struct gcoap_serializer {
+  size_t buf_len;
+  char* buf;
   size_t cursor;
-  uint32_t header;
-  const char* token;
-  size_t opts_len;
-  const char* opts;
-  size_t payload_len;
-  const char* payload;
+  gcoap_serializer_state_t state;
 };
 
 /**
  * CoAP parser.
  */
-struct gcoap_parser_t {
-  size_t capacity;
+struct gcoap_parser {
+  size_t size;
   size_t cursor;
   const char* token;
   size_t token_len;
 };
-
-static inline void gcoap_serializer_write_uint8_(gcoap_serializer_t* s,
-                                                 char* dst, size_t dst_len,
-                                                 uint8_t src) {
-  assert(s != NULL && dst != NULL && dst_len > 0 && dst_len - s->cursor >= 1);
-  dst[s->cursor] = src;
-  s->cursor++;
-  return;
-}
-
-static inline void gcoap_serializer_write_uint16_(gcoap_serializer_t* s,
-                                                  char* dst, size_t dst_len,
-                                                  uint16_t src) {
-  assert(s != NULL && dst != NULL && dst_len > 0 && dst_len - s->cursor >= 2);
-  memcpy(&dst[s->cursor], &src, 2);
-  s->cursor += 2;
-  return;
-}
-
-static inline void gcoap_serializer_write_uint32_(gcoap_serializer_t* s,
-                                                  char* dst, size_t dst_len,
-                                                  uint32_t src) {
-  assert(s != NULL && dst != NULL && dst_len > 0 && dst_len - s->cursor >= 4);
-  memcpy(&dst[s->cursor], &src, 4);
-  s->cursor += 4;
-  return;
-}
-
-static inline void gcoap_serializer_write_buf_(gcoap_serializer_t* s, char* dst,
-                                               size_t dst_len, const char* src,
-                                               size_t src_len) {
-  assert(s != NULL && dst != NULL && dst_len > 0 &&
-         dst_len - s->cursor >= src_len);
-  assert(src != NULL && src_len > 0);
-  memcpy(&dst[s->cursor], src, src_len);
-  s->cursor += src_len;
-  return;
-}
-
-static inline void gcoap_parser_read_(gcoap_parser_t* p, void* dst,
-                                      size_t dst_len, const char* src,
-                                      size_t src_len) {
-  assert(p != NULL && src_len - p->cursor >= dst_len);
-  memcpy(dst, &src[p->cursor], dst_len);
-  p->cursor += dst_len;
-  return;
-}
-
-static inline void gcoap_parser_read_uint16_(gcoap_parser_t* p, uint16_t* dst,
-                                             const char* src, size_t len) {
-  gcoap_parser_read_(p, (void*)dst, sizeof(*dst), src, len);
-  return;
-}
-
-static inline void gcoap_parser_read_uint32_(gcoap_parser_t* p, uint32_t* dst,
-                                             const char* src, size_t len) {
-  gcoap_parser_read_(p, (void*)dst, sizeof(*dst), src, len);
-  return;
-}
 
 #ifdef __cplusplus
 }
