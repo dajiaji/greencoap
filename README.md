@@ -11,25 +11,27 @@ Features:
 ## Usage
 
 ```c
-char* buf[2048] = {};
-gcoap_serializer* s = gcoap_serializer_init(malloc(gcoap_serializer_size()), gcoap_serializer_size());
-gcoap_parser* p = gcoap_parser_init(malloc(gcoap_parser_size(), gcoap_serializer_size());
 
-// How to use the gcoap_serializer_t.
+char* buf[2048] = {};
+gcoap_serializer* s = NULL;
+gcoap_parser* p = NULL;
+
+gcoap_serializer_init(&s, malloc(gcoap_serializer_size()), gcoap_serializer_size());
+gcoap_parser_init(&p, malloc(gcoap_parser_size(), gcoap_parser_size());
+
+// How to use gcoap_serializer.
 gcoap_serializer_begin(s, buf, 2048);
 gcoap_serializer_set_header(s, T_CON | C_GET, "token", sizeof("token")-1);
-//gcoap_serializer_add_opt(s, O_URI_HOST, "example.com", sizeof("example.com")-1);
-//gcoap_serializer_add_opt_uint(s, O_URI_PORT, 5683);
+gcoap_serializer_add_opt(s, O_URI_HOST, "example.com", sizeof("example.com")-1);
+gcoap_serializer_add_opt_uint(s, O_URI_PORT, 5683);
 gcoap_serializer_add_opt(s, O_URI_PATH, "/temperature", sizeof("/temperature")-1);
 
-// How to use the gcoap_parser_t.
-gcoap_parser_create(&p, workspace, 512);
-gcoap_parser_exec(p, send_buf, 2048);
+// How to use gcoap_parser.
+gcoap_parser_exec(p, buf, 2048);
 
-printf("type: %u\n", gcoap_parser_get_type(p));
-printf("code: %u\n", gcoap_parser_get_code(p));
+printf("\n", );
 
-gcoap_serializer_destroy(s);
-gcoap_parser_destroy(p);
+free(s);
+free(p);
 
 ```
