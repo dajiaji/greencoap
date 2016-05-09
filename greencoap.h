@@ -115,21 +115,27 @@ int gcoap_serializer_set_header(gcoap_serializer* s, uint32_t header,
                                 const char* token, uint8_t token_len);
 
 /**
- * Add a (opaque, string, etc.) option.
- */
-int gcoap_serializer_add_opt(gcoap_serializer* s, gcoap_opt_number_t opt,
-                             const char* val, size_t len);
-
-/**
  * Add an empty option.
  */
-int gcoap_serializer_add_opt_empty(gcoap_serializer* s, gcoap_opt_number_t opt);
+int gcoap_serializer_add_opt_empty(gcoap_serializer* s, uint16_t opt);
+
+/**
+ * Add an opaque option.
+ */
+int gcoap_serializer_add_opt_opaque(gcoap_serializer* s, uint16_t opt,
+                                    const char* val, size_t len);
 
 /**
  * Add a uint option.
  */
-int gcoap_serializer_add_opt_uint(gcoap_serializer* s, gcoap_opt_number_t opt,
+int gcoap_serializer_add_opt_uint(gcoap_serializer* s, uint16_t opt,
                                   uint32_t val);
+
+/**
+ * Add a string option.
+ */
+int gcoap_serializer_add_opt_string(gcoap_serializer* s, uint16_t opt,
+                                    const char* val, size_t len);
 
 /**
  * Set a payload.

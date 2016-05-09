@@ -19,9 +19,9 @@ gcoap_serializer* s = NULL;
 gcoap_serializer_init(&s, malloc(gcoap_serializer_size()), gcoap_serializer_size());
 gcoap_serializer_begin(s, buf, 2048);
 gcoap_serializer_set_header(s, T_CON | C_GET, "token", sizeof("token")-1);
-gcoap_serializer_add_opt(s, O_URI_HOST, "example.com", sizeof("example.com")-1);
+gcoap_serializer_add_opt_string(s, O_URI_HOST, "example.com", sizeof("example.com")-1);
 gcoap_serializer_add_opt_uint(s, O_URI_PORT, 5683);
-gcoap_serializer_add_opt(s, O_URI_PATH, "/temperature", sizeof("/temperature")-1);
+gcoap_serializer_add_opt_string(s, O_URI_PATH, "/temperature", sizeof("/temperature")-1);
 
 // How to use gcoap_parser.
 gcoap_parser* p = NULL;

@@ -195,25 +195,7 @@ int gcoap_serializer_set_header(gcoap_serializer* s, uint32_t header,
   return GCOAP_OK;
 }
 
-int gcoap_serializer_add_opt(gcoap_serializer* s, gcoap_opt_number_t opt,
-                             const char* val, size_t len) {
-  if (s == NULL) {
-    return GCOAP_ERR_INVALID_ARGUMENT;
-  }
-  if (s->state != GCOAP_S_STATE_WRITTEN_HEADER || s->sum_of_delta > opt) {
-    return GCOAP_ERR_INVALID_CALL;
-  }
-  // if (delta <= 12) {
-  //} else if (delta <= 255 + 13) {
-  //} else if (delta <= 65535 + 269) {
-  //} else {
-  //  return GOAP_ERR_INVALID_AR
-  //}
-  return GCOAP_OK;
-}
-
-int gcoap_serializer_add_opt_empty(gcoap_serializer* s,
-                                   gcoap_opt_number_t opt) {
+int gcoap_serializer_add_opt_empty(gcoap_serializer* s, uint16_t opt) {
   if (s == NULL || opt != O_IF_NONE_MATCH) {
     return GCOAP_ERR_INVALID_ARGUMENT;
   }
@@ -229,7 +211,34 @@ int gcoap_serializer_add_opt_empty(gcoap_serializer* s,
   return GCOAP_OK;
 }
 
-int gcoap_serializer_add_opt_uint(gcoap_serializer* s, gcoap_opt_number_t opt,
+int gcoap_serializer_add_opt_opaque(gcoap_serializer* s, uint16_t opt,
+                                    const char* val, size_t len) {
+  if (s == NULL || opt >= 65000) {
+    return GCOAP_ERR_INVALID_ARGUMENT;
+  }
+  if (s->state != GCOAP_S_STATE_WRITTEN_HEADER) {
+    return GCOAP_ERR_INVALID_CALL;
+  }
+  if (opt <= 255) {
+    switch (opt) {
+      case O_IF_MATCH:
+        if (len > 8) {
+          return GCOAP_ERR_INVALID_ARGUMENT;
+        }
+        break;
+      case O_ETAG:
+        if (val == NULL || len == 0 || len > 8) {
+          return GCOAP_ERR_INVALID_ARGUMENT;
+        }
+        break;
+      default:
+        return GCOAP_ERR_INVALID_ARGUMENT;
+    }
+  }
+  return GCOAP_OK;
+}
+
+int gcoap_serializer_add_opt_uint(gcoap_serializer* s, uint16_t opt,
                                   uint32_t val) {
   if (s == NULL) {
     return GCOAP_ERR_INVALID_ARGUMENT;
@@ -320,6 +329,42 @@ int gcoap_serializer_add_opt_uint(gcoap_serializer* s, gcoap_opt_number_t opt,
 error:
   gcoap_s_clear_(s);
   return GCOAP_ERR_LIMIT;
+}
+
+int gcoap_serializer_add_opt_string(gcoap_serializer* s, uint16_t opt,
+                                    const char* val, size_t len) {
+  if (s == NULL || opt >= 65000) {
+    return GCOAP_ERR_INVALID_ARGUMENT;
+  }
+  if (s->state != GCOAP_S_STATE_WRITTEN_HEADER) {
+    return GCOAP_ERR_INVALID_CALL;
+  }
+  if (opt <= 255) {
+    switch (opt) {
+      case O_URI_HOST:
+      case O_PROXY_SCHEME:
+        if (val == NULL || len == 0 || len > 255) {
+          return GCOAP_ERR_INVALID_ARGUMENT;
+        }
+        break;
+      case O_LOCATION_PATH:
+      case O_URI_PATH:
+      case O_URI_QUERY:
+      case O_LOCATION_QUERY:
+        if (len > 255) {
+          return GCOAP_ERR_INVALID_ARGUMENT;
+        }
+        break;
+      case O_PROXY_URI:
+        if (val == NULL || len == 0 || len > 1034) {
+          return GCOAP_ERR_INVALID_ARGUMENT;
+        }
+        break;
+      default:
+        return GCOAP_ERR_INVALID_ARGUMENT;
+    }
+  }
+  return 0;
 }
 
 int gcoap_serializer_set_payload(gcoap_serializer* s, const char* payload,
