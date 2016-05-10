@@ -115,6 +115,11 @@ int gcoap_serializer_set_header(gcoap_serializer* s, uint32_t header,
                                 const char* token, uint8_t token_len);
 
 /**
+ * Add a raw option.
+ */
+int gcoap_serializer_add_opt(gcoap_serializer* s, uint16_t opt, const char* val,
+                             size_t len);
+/**
  * Add an empty option.
  */
 int gcoap_serializer_add_opt_empty(gcoap_serializer* s, uint16_t opt);

@@ -54,6 +54,7 @@ struct gcoap_serializer {
   size_t buf_len;
   char* buf;
   size_t cursor;
+  size_t payload;
   gcoap_serializer_state_t state;
   uint32_t sum_of_delta;
 };
