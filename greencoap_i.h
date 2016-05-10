@@ -9,65 +9,64 @@ extern "C" {
 #include <assert.h>
 #include <string.h>
 
-#define GCOAP_COAP_VER (1 << 30)
+#define COAP_VERSION (1 << 30)
 
-#define GCOAP_TRUE 1
-#define GCOAP_FALSE 0
+#define COAP_LEN_HEADER 4
+#define COAP_MAXLEN_TOKEN 8
 
-#define GCOAP_LEN_HEADER 4
-#define GCOAP_MAXLEN_TOKEN 8
+//#define IS_REQUEST_(msg_type) (((msg_type)&0x1001) == 1)
 
-#define IS_REQUEST_(msg_type) (((msg_type)&0x1001) == 1)
-
-typedef uint8_t gcoap_bool_t;
+// typedef uint8_t coap_bool_t;
 
 /**
- * Internal states for gcoap_serializer.
+ * Internal states for coap_serializer.
  */
-typedef enum gcoap_serializer_state_t {
-  GCOAP_S_STATE_INIT = 0,
-  GCOAP_S_STATE_WRITTEN_HEADER,
-  GCOAP_S_STATE_WRITTEN_PAYLOAD,
-} gcoap_serializer_state_t;
+typedef enum coap_serializer_state_t {
+  COAP_S_STATE_INIT = 0,
+  COAP_S_STATE_WRITTEN_HEADER,
+  COAP_S_STATE_WRITTEN_PAYLOAD,
+} coap_serializer_state_t;
 
 /**
- * Internal states for gcoap_parser.
+ * Internal states for coap_parser.
  */
-typedef enum gcoap_parser_state_t {
-  GCOAP_P_STATE_INIT = 0,
-  GCOAP_P_STATE_READ_HEADER,
-  GCOAP_P_STATE_READ_PAYLOAD,
-} gcoap_parser_state_t;
+typedef enum coap_parser_state_t {
+  COAP_P_STATE_INIT = 0,
+  COAP_P_STATE_READ_HEADER,
+  COAP_P_STATE_READ_PAYLOAD,
+} coap_parser_state_t;
 
 /**
  * General buffer.
  */
-typedef struct gcoap_buf_t {
-  uint16_t len;
-  const char* val;
-} gcoap_buf_t;
+// typedef struct coap_buf_t {
+//  uint16_t len;
+//  const char* val;
+//} coap_buf_t;
 
 /**
  * CoAP serializer.
  */
-struct gcoap_serializer {
+struct coap_serializer {
   size_t buf_len;
   char* buf;
   size_t cursor;
   size_t payload;
-  gcoap_serializer_state_t state;
+  coap_serializer_state_t state;
   uint32_t sum_of_delta;
 };
 
 /**
  * CoAP parser.
  */
-struct gcoap_parser {
-  size_t size;
+struct coap_parser {
+  size_t buf_len;
+  const char* buf;
   size_t cursor;
-  const char* token;
-  size_t token_len;
-  gcoap_parser_state_t state;
+  uint32_t header;
+  uint8_t token_len;
+  size_t payload;
+  coap_parser_state_t state;
 };
 
 #ifdef __cplusplus

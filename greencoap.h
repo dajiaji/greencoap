@@ -117,8 +117,9 @@ int coap_serializer_set_header(coap_serializer* s, uint32_t header,
 /**
  * Add a raw option.
  */
-int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
-                            size_t len);
+// int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char*
+// val,
+// size_t len);
 /**
  * Add an empty option.
  */

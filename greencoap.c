@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 
-inline void coap_s_clear_(coap_serializer* s) {
+#define IS_WELL_KNOWN_(x) (x <= 255)
+
+static void coap_s_clear_(coap_serializer* s) {
   assert(s != NULL && s->buf != NULL && s->buf_len > 0);
   s->cursor = 0;
   s->sum_of_delta = 0;
@@ -11,40 +13,7 @@ inline void coap_s_clear_(coap_serializer* s) {
   return;
 }
 
-inline int coap_validate_header_(uint32_t header) { return 0; }
-
-inline int coap_s_write_uint8_(coap_serializer* s, uint8_t src) {
-  assert(s != NULL && s->buf != NULL && s->buf_len > 0);
-  if (s->buf_len - s->cursor < 1) {
-    return -1;
-  }
-  memcpy(&s->buf[s->cursor], &src, 1);
-  s->cursor++;
-  return 0;
-}
-
-inline int coap_s_write_uint16_(coap_serializer* s, uint16_t src) {
-  assert(s != NULL && s->buf != NULL && s->buf_len > 0);
-  if (s->buf_len - s->cursor < 2) {
-    return -1;
-  }
-  memcpy(&s->buf[s->cursor], &src, 2);
-  s->cursor += 2;
-  return 0;
-}
-
-inline int coap_s_write_uint32_(coap_serializer* s, uint32_t src) {
-  assert(s != NULL && s->buf != NULL && s->buf_len > 0);
-  if (s->buf_len - s->cursor < 4) {
-    return -1;
-  }
-  memcpy(&s->buf[s->cursor], &src, 4);
-  s->cursor += 4;
-  return 0;
-}
-
-inline int coap_s_write_buf_(coap_serializer* s, const char* src,
-                             size_t src_len) {
+static int coap_s_write_(coap_serializer* s, const char* src, size_t src_len) {
   assert(s != NULL && s->buf != NULL && s->buf_len > 0 && src != NULL &&
          src_len > 0);
   if (s->buf_len - s->cursor < src_len) {
@@ -55,25 +24,40 @@ inline int coap_s_write_buf_(coap_serializer* s, const char* src,
   return 0;
 }
 
-inline void coap_p_read_(coap_parser* p, void* dst, size_t dst_len,
-                         const char* src, size_t src_len) {
-  assert(p != NULL && src_len - p->cursor >= dst_len);
-  memcpy(dst, &src[p->cursor], dst_len);
+static int coap_s_write_uint8_(coap_serializer* s, uint8_t src) {
+  return coap_s_write_(s, (const char*)&src, 1);
+}
+
+static int coap_s_write_uint16_(coap_serializer* s, uint16_t src) {
+  return coap_s_write_(s, (const char*)&src, 2);
+}
+
+static int coap_s_write_uint32_(coap_serializer* s, uint32_t src) {
+  return coap_s_write_(s, (const char*)&src, 4);
+}
+
+static int coap_p_read_(coap_parser* p, char* dst, size_t dst_len) {
+  assert(p != NULL && p->buf != NULL && p->buf_len > 0 && dst != NULL &&
+         dst_len > 0);
+  if (p->buf_len - p->cursor < dst_len) {
+    return -1;
+  }
+  memcpy(dst, &p->buf[p->cursor], dst_len);
   p->cursor += dst_len;
-  return;
+  return 0;
 }
 
-inline void coap_p_read_uint16_(coap_parser* p, uint16_t* dst, const char* src,
-                                size_t len) {
-  coap_p_read_(p, (void*)dst, sizeof(*dst), src, len);
-  return;
-}
-
-inline void coap_p_read_uint32_(coap_parser* p, uint32_t* dst, const char* src,
-                                size_t len) {
-  coap_p_read_(p, (void*)dst, sizeof(*dst), src, len);
-  return;
-}
+// inline int coap_p_read_uint8_(coap_parser* p, uint8_t* dst) {
+//  return coap_p_read_(p, (void*)dst, sizeof(*dst));
+//}
+//
+// inline int coap_p_read_uint16_(coap_parser* p, uint16_t* dst) {
+//  return coap_p_read_(p, (void*)dst, sizeof(*dst));
+//}
+//
+// inline int coap_p_read_uint32_(coap_parser* p, uint32_t* dst) {
+//  return coap_p_read_(p, (void*)dst, sizeof(*dst));
+//}
 
 int coap_serializer_init(coap_serializer** s, void* buf, size_t len) {
   if (buf == NULL || sizeof(coap_serializer) > len) {
@@ -104,13 +88,40 @@ int coap_serializer_set_header(coap_serializer* s, uint32_t header,
       (token != NULL && token_len == 0)) {
     return COAP_ERR_INVALID_ARGUMENT;
   }
-  if (coap_validate_header_(header)) {  // != 0
-    return COAP_ERR_INVALID_ARGUMENT;
+  switch (header & 0x00FF0000) {
+    case C_GET:
+    case C_POST:
+    case C_PUT:
+    case C_DELETE:
+    case C_CREATED:
+    case C_DELETED:
+    case C_VALID:
+    case C_CHANGED:
+    case C_CONTENT:
+    case C_BAD_REQUEST:
+    case C_UNAUTHORIZED:
+    case C_BAD_OPTION:
+    case C_FORBIDDEN:
+    case C_NOT_FOUND:
+    case C_METHOD_NOT_ALLOWED:
+    case C_NOT_ACCEPTABLE:
+    case C_PRECONDITION_FAILED:
+    case C_REQUEST_ENTITY_TOO_LARGE:
+    case C_UNSUPPORTED_CONTENT_FORMAT:
+    case C_INTERNAL_SERVER_ERROR:
+    case C_NOT_IMPLEMENTED:
+    case C_BAD_GATEWAY:
+    case C_SERVICE_UNAVAILABLE:
+    case C_GATEWAY_TIMEOUT:
+    case C_PROXYING_NOT_SUPPORTED:
+      break;
+    default:
+      return COAP_ERR_INVALID_ARGUMENT;
   }
   s->cursor = 0;
   s->sum_of_delta = 0;
-  coap_s_write_uint32_(s, htonl(COAP_COAP_VER | header | (token_len << 24)));
-  if (token != NULL && coap_s_write_buf_(s, token, token_len)) {  // != 0
+  coap_s_write_uint32_(s, htonl(COAP_VERSION | header | (token_len << 24)));
+  if (token != NULL && coap_s_write_(s, token, token_len)) {  // != 0
     coap_s_clear_(s);
     return COAP_ERR_LIMIT;
   }
@@ -118,8 +129,8 @@ int coap_serializer_set_header(coap_serializer* s, uint32_t header,
   return COAP_OK;
 }
 
-int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
-                            size_t len) {
+static int coap_serializer_add_opt(coap_serializer* s, uint16_t opt,
+                                   const char* val, size_t len) {
   /**
   +-----+---+---+---+---+----------------+--------+--------+----------+
   | No. | C | U | N | R | Name           | Format | Length | Default  |
@@ -150,7 +161,7 @@ int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
   if (s->state != COAP_S_STATE_WRITTEN_HEADER) {
     return COAP_ERR_INVALID_CALL;
   }
-  if (opt <= 255) {  // well-known option
+  if (IS_WELL_KNOWN_(opt)) {
     switch (opt) {
       // empty
       case O_IF_NONE_MATCH:
@@ -162,19 +173,15 @@ int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
         }
         break;
       // opaque
+      case O_ETAG:
+        if (val == NULL || len == 0) {
+          return COAP_ERR_INVALID_ARGUMENT;
+        }
       case O_IF_MATCH:
         if (len > 8) {
           return COAP_ERR_INVALID_ARGUMENT;
         }
         if (s->sum_of_delta > opt) {
-          return COAP_ERR_INVALID_CALL;
-        }
-        break;
-      case O_ETAG:
-        if (val == NULL || len == 0 || len > 8) {
-          return COAP_ERR_INVALID_ARGUMENT;
-        }
-        if (s->sum_of_delta >= opt) {
           return COAP_ERR_INVALID_CALL;
         }
         break;
@@ -230,7 +237,7 @@ int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
   } else {
     // Except well-known options, all other options are regarded as Repeatable
     // options.
-    if (s->sum_of_delta >= opt) {
+    if (s->sum_of_delta > opt) {
       return COAP_ERR_INVALID_CALL;
     }
   }
@@ -279,7 +286,7 @@ int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
   }
 
   // Option Value
-  if (coap_s_write_buf_(s, val, len)) {
+  if (coap_s_write_(s, val, len)) {
     goto error;
   }
   s->sum_of_delta = opt;
@@ -290,7 +297,7 @@ error:
 }
 
 int coap_serializer_add_opt_empty(coap_serializer* s, uint16_t opt) {
-  if (opt <= 255) {
+  if (IS_WELL_KNOWN_(opt)) {
     switch (opt) {
       case O_IF_NONE_MATCH:
         break;
@@ -303,7 +310,7 @@ int coap_serializer_add_opt_empty(coap_serializer* s, uint16_t opt) {
 
 int coap_serializer_add_opt_opaque(coap_serializer* s, uint16_t opt,
                                    const char* val, size_t len) {
-  if (opt <= 255) {
+  if (IS_WELL_KNOWN_(opt)) {
     switch (opt) {
       case O_IF_MATCH:
       case O_ETAG:
@@ -317,7 +324,7 @@ int coap_serializer_add_opt_opaque(coap_serializer* s, uint16_t opt,
 
 int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
                                  uint32_t val) {
-  if (opt <= 255) {
+  if (IS_WELL_KNOWN_(opt)) {
     switch (opt) {
       case O_URI_PORT:
       case O_CONTENT_FORMAT:
@@ -346,7 +353,7 @@ int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
 
 int coap_serializer_add_opt_string(coap_serializer* s, uint16_t opt,
                                    const char* val, size_t len) {
-  if (opt <= 255) {
+  if (IS_WELL_KNOWN_(opt)) {
     switch (opt) {
       case O_URI_HOST:
       case O_PROXY_SCHEME:
@@ -373,12 +380,13 @@ int coap_serializer_set_payload(coap_serializer* s, const char* payload,
   }
   if (s->state == COAP_S_STATE_WRITTEN_PAYLOAD) {
     s->cursor = s->payload;
+  } else {
+    if (coap_s_write_uint8_(s, 0xFF)) {
+      goto error;
+    }
+    s->payload = s->cursor;
   }
-  if (coap_s_write_uint8_(s, 0xFF)) {
-    goto error;
-  }
-  s->payload = s->cursor;
-  if (coap_s_write_buf_(s, payload, payload_len)) {
+  if (coap_s_write_(s, payload, payload_len)) {
     goto error;
   }
   s->state = COAP_S_STATE_WRITTEN_PAYLOAD;
@@ -393,6 +401,10 @@ int coap_parser_init(coap_parser** p, const char* buf, size_t len) {
     return COAP_ERR_INVALID_ARGUMENT;
   }
   *p = (coap_parser*)buf;
+  (*p)->buf_len = 0;
+  (*p)->buf = NULL;
+  (*p)->cursor = 0;
+  (*p)->state = COAP_P_STATE_INIT;
   return COAP_OK;
 }
 
@@ -400,8 +412,58 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
   if (p == NULL || buf == NULL || len == 0) {
     return COAP_ERR_INVALID_ARGUMENT;
   }
+  p->buf_len = len;
+  p->buf = buf;
   p->cursor = 0;
+
+  // Parse a CoAP header.
+  if (coap_p_read_(p, (char*)&p->header, 4)) {
+    goto error;
+  }
+  p->header = ntohl(p->header);
+  if ((p->header & 0xC0000000) != COAP_VERSION) {
+    goto error;
+  }
+  switch (p->header & 0x00FF0000) {
+    case C_GET:
+    case C_POST:
+    case C_PUT:
+    case C_DELETE:
+    case C_CREATED:
+    case C_DELETED:
+    case C_VALID:
+    case C_CHANGED:
+    case C_CONTENT:
+    case C_BAD_REQUEST:
+    case C_UNAUTHORIZED:
+    case C_BAD_OPTION:
+    case C_FORBIDDEN:
+    case C_NOT_FOUND:
+    case C_METHOD_NOT_ALLOWED:
+    case C_NOT_ACCEPTABLE:
+    case C_PRECONDITION_FAILED:
+    case C_REQUEST_ENTITY_TOO_LARGE:
+    case C_UNSUPPORTED_CONTENT_FORMAT:
+    case C_INTERNAL_SERVER_ERROR:
+    case C_NOT_IMPLEMENTED:
+    case C_BAD_GATEWAY:
+    case C_SERVICE_UNAVAILABLE:
+    case C_GATEWAY_TIMEOUT:
+    case C_PROXYING_NOT_SUPPORTED:
+      break;
+    default:
+      goto error;
+  }
+  p->token_len = (p->header & 0x0F000000) >> 24;
+  if (p->token_len > 8) {
+    goto error;
+  }
+  p->cursor += p->token_len;
+
+  // Parse a CoAP options.
   return COAP_OK;
+error:
+  return COAP_ERR_SYNTAX;
 }
 
 int coap_parser_get_type(const coap_parser* p, coap_type_t* res) {
