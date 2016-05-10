@@ -11,31 +11,31 @@ extern "C" {
 /**
  * Status codes for greencoap APIs.
  */
-typedef enum gcoap_status_t {
-  GCOAP_OK = 0,
-  GCOAP_ERR_INVALID_ARGUMENT = -1,
-  GCOAP_ERR_LIMIT = -2,
-  GCOAP_ERR_INVALID_CALL = -3,
-  GCOAP_ERR_SYNTAX = -4,
-  GCOAP_ERR_SYSTEM = -5,
-  GCOAP_ERR_INTERNAL = -6,
-  GCOAP_ERR_UNKNOWN = -7,
-} gcoap_status_t;
+typedef enum coap_status_t {
+  COAP_OK = 0,
+  COAP_ERR_INVALID_ARGUMENT = -1,
+  COAP_ERR_LIMIT = -2,
+  COAP_ERR_INVALID_CALL = -3,
+  COAP_ERR_SYNTAX = -4,
+  COAP_ERR_SYSTEM = -5,
+  COAP_ERR_INTERNAL = -6,
+  COAP_ERR_UNKNOWN = -7,
+} coap_status_t;
 
 /**
  * CoAP message types.
  */
-typedef enum gcoap_type_t {
+typedef enum coap_type_t {
   T_CON = 0,
   T_NON = 1 << 28,
   T_ACK = 2 << 28,
   T_RST = 3 << 28,
-} gcoap_type_t;
+} coap_type_t;
 
 /**
  * CoAP message codes.
  */
-typedef enum gcoap_code_t {
+typedef enum coap_code_t {
   // 0.xx
   C_GET = 1 << 16,     // 0.01
   C_POST = 2 << 16,    // 0.02
@@ -65,12 +65,12 @@ typedef enum gcoap_code_t {
   C_SERVICE_UNAVAILABLE = 5 << 21 | 3 << 16,     // 5.03
   C_GATEWAY_TIMEOUT = 5 << 21 | 4 << 16,         // 5.04
   C_PROXYING_NOT_SUPPORTED = 5 << 21 | 5 << 16,  // 5.05
-} gcoap_code_t;
+} coap_code_t;
 
 /**
  * CoAP options.
  */
-typedef enum gcoap_opt_number_t {
+typedef enum coap_opt_number_t {
   O_IF_MATCH = 1,
   O_URI_HOST = 3,
   O_ETAG = 4,
@@ -90,104 +90,104 @@ typedef enum gcoap_opt_number_t {
   // O_RESERVED = 132,
   // O_RESERVED = 136,
   // O_RESERVED = 140,
-} gcoap_opt_number_t;
+} coap_opt_number_t;
 
 /** CoAP serializer */
-typedef struct gcoap_serializer gcoap_serializer;
+typedef struct coap_serializer coap_serializer;
 
 /** CoAP parser */
-typedef struct gcoap_parser gcoap_parser;
+typedef struct coap_parser coap_parser;
 
 /**
- * Create a CoAP serializer (gcoap_serializer) with fixed size memory space.
+ * Create a CoAP serializer (coap_serializer) with fixed size memory space.
  */
-int gcoap_serializer_init(gcoap_serializer** s, void* buf, size_t len);
+int coap_serializer_init(coap_serializer** s, void* buf, size_t len);
 
 /**
  * Initialize the CoAP serializer with fixed size write buffer.
  */
-int gcoap_serializer_begin(gcoap_serializer* s, char* buf, size_t len);
+int coap_serializer_begin(coap_serializer* s, char* buf, size_t len);
 
 /**
  * Set a CoAP header and a token.
  */
-int gcoap_serializer_set_header(gcoap_serializer* s, uint32_t header,
-                                const char* token, uint8_t token_len);
+int coap_serializer_set_header(coap_serializer* s, uint32_t header,
+                               const char* token, uint8_t token_len);
 
 /**
  * Add a raw option.
  */
-int gcoap_serializer_add_opt(gcoap_serializer* s, uint16_t opt, const char* val,
-                             size_t len);
+int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
+                            size_t len);
 /**
  * Add an empty option.
  */
-int gcoap_serializer_add_opt_empty(gcoap_serializer* s, uint16_t opt);
+int coap_serializer_add_opt_empty(coap_serializer* s, uint16_t opt);
 
 /**
  * Add an opaque option.
  */
-int gcoap_serializer_add_opt_opaque(gcoap_serializer* s, uint16_t opt,
-                                    const char* val, size_t len);
+int coap_serializer_add_opt_opaque(coap_serializer* s, uint16_t opt,
+                                   const char* val, size_t len);
 
 /**
  * Add a uint option.
  */
-int gcoap_serializer_add_opt_uint(gcoap_serializer* s, uint16_t opt,
-                                  uint32_t val);
+int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
+                                 uint32_t val);
 
 /**
  * Add a string option.
  */
-int gcoap_serializer_add_opt_string(gcoap_serializer* s, uint16_t opt,
-                                    const char* val, size_t len);
+int coap_serializer_add_opt_string(coap_serializer* s, uint16_t opt,
+                                   const char* val, size_t len);
 
 /**
  * Set a payload.
  */
-int gcoap_serializer_set_payload(gcoap_serializer* s, const char* buf,
-                                 size_t len);
+int coap_serializer_set_payload(coap_serializer* s, const char* buf,
+                                size_t len);
 
 /**
- * Create a CoAP parser (gcoap_parser) with fixed size memory space.
+ * Create a CoAP parser (coap_parser) with fixed size memory space.
  */
-int gcoap_parser_init(gcoap_parser** p, const char* buf, size_t len);
+int coap_parser_init(coap_parser** p, const char* buf, size_t len);
 
 /**
  * Parse a given buffer as a CoAP message.
  */
-int gcoap_parser_exec(gcoap_parser* p, const char* buf, size_t len);
+int coap_parser_exec(coap_parser* p, const char* buf, size_t len);
 
 /**
  * Get the CoAP message type.
  */
-int gcoap_parser_get_type(const gcoap_parser* p, gcoap_type_t* type);
+int coap_parser_get_type(const coap_parser* p, coap_type_t* type);
 
 /**
  * Get the CoAP message code.
  */
-int gcoap_parser_get_code(const gcoap_parser* p, gcoap_code_t* code);
+int coap_parser_get_code(const coap_parser* p, coap_code_t* code);
 
 /**
  * Get the value of path.
  */
-int gcoap_parser_get_path(const gcoap_parser* p, const char** buf, size_t* len);
+int coap_parser_get_path(const coap_parser* p, const char** buf, size_t* len);
 
 /**
  * Get a CoAP message payload.
  */
-int gcoap_parser_get_payload(const gcoap_parser* p, const char** buf,
-                             size_t* len);
+int coap_parser_get_payload(const coap_parser* p, const char** buf,
+                            size_t* len);
 
 /**
- * Get the size of gcoap_serializer.
+ * Get the size of coap_serializer.
  */
-size_t gcoap_serializer_size();
+size_t coap_serializer_size();
 
 /**
- * Get the size of gcoap_parser.
+ * Get the size of coap_parser.
  */
-size_t gcoap_parser_size();
+size_t coap_parser_size();
 
 #ifdef __cplusplus
 }
