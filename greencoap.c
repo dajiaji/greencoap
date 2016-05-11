@@ -158,8 +158,8 @@ int coap_serializer_set_header(coap_serializer* s, uint32_t header,
   return COAP_OK;
 }
 
-static int coap_serializer_add_opt(coap_serializer* s, uint16_t opt,
-                                   const char* val, size_t len) {
+int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
+                            size_t len) {
   /**
   +-----+---+---+---+---+----------------+--------+--------+----------+
   | No. | C | U | N | R | Name           | Format | Length | Default  |
@@ -325,32 +325,6 @@ error:
   return COAP_ERR_LIMIT;
 }
 
-int coap_serializer_add_opt_empty(coap_serializer* s, uint16_t opt) {
-  if (IS_WELL_KNOWN_(opt)) {
-    switch (opt) {
-      case O_IF_NONE_MATCH:
-        break;
-      default:
-        return COAP_ERR_INVALID_ARGUMENT;
-    }
-  }
-  return coap_serializer_add_opt(s, opt, NULL, 0);
-}
-
-int coap_serializer_add_opt_opaque(coap_serializer* s, uint16_t opt,
-                                   const char* val, size_t len) {
-  if (IS_WELL_KNOWN_(opt)) {
-    switch (opt) {
-      case O_IF_MATCH:
-      case O_ETAG:
-        break;
-      default:
-        return COAP_ERR_INVALID_ARGUMENT;
-    }
-  }
-  return coap_serializer_add_opt(s, opt, val, len);
-}
-
 int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
                                  uint32_t val) {
   if (IS_WELL_KNOWN_(opt)) {
@@ -380,24 +354,50 @@ int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
   return coap_serializer_add_opt(s, opt, (const char*)&nbo_val, 4);
 }
 
-int coap_serializer_add_opt_string(coap_serializer* s, uint16_t opt,
-                                   const char* val, size_t len) {
-  if (IS_WELL_KNOWN_(opt)) {
-    switch (opt) {
-      case O_URI_HOST:
-      case O_PROXY_SCHEME:
-      case O_LOCATION_PATH:
-      case O_URI_PATH:
-      case O_URI_QUERY:
-      case O_LOCATION_QUERY:
-      case O_PROXY_URI:
-        break;
-      default:
-        return COAP_ERR_INVALID_ARGUMENT;
-    }
-  }
-  return coap_serializer_add_opt(s, opt, val, len);
-}
+// int coap_serializer_add_opt_empty(coap_serializer* s, uint16_t opt) {
+//  if (IS_WELL_KNOWN_(opt)) {
+//    switch (opt) {
+//      case O_IF_NONE_MATCH:
+//        break;
+//      default:
+//        return COAP_ERR_INVALID_ARGUMENT;
+//    }
+//  }
+//  return coap_serializer_add_opt(s, opt, NULL, 0);
+//}
+
+// int coap_serializer_add_opt_opaque(coap_serializer* s, uint16_t opt,
+//                                   const char* val, size_t len) {
+//  if (IS_WELL_KNOWN_(opt)) {
+//    switch (opt) {
+//      case O_IF_MATCH:
+//      case O_ETAG:
+//        break;
+//      default:
+//        return COAP_ERR_INVALID_ARGUMENT;
+//    }
+//  }
+//  return coap_serializer_add_opt(s, opt, val, len);
+//}
+
+// int coap_serializer_add_opt_string(coap_serializer* s, uint16_t opt,
+//                                   const char* val, size_t len) {
+//  if (IS_WELL_KNOWN_(opt)) {
+//    switch (opt) {
+//      case O_URI_HOST:
+//      case O_PROXY_SCHEME:
+//      case O_LOCATION_PATH:
+//      case O_URI_PATH:
+//      case O_URI_QUERY:
+//      case O_LOCATION_QUERY:
+//      case O_PROXY_URI:
+//        break;
+//      default:
+//        return COAP_ERR_INVALID_ARGUMENT;
+//    }
+//  }
+//  return coap_serializer_add_opt(s, opt, val, len);
+//}
 
 int coap_serializer_set_payload(coap_serializer* s, const char* payload,
                                 size_t payload_len) {

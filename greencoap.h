@@ -117,19 +117,18 @@ int coap_serializer_set_header(coap_serializer* s, uint32_t header,
 /**
  * Add a raw option.
  */
-// int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char*
-// val,
-// size_t len);
+int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
+                            size_t len);
 /**
  * Add an empty option.
  */
-int coap_serializer_add_opt_empty(coap_serializer* s, uint16_t opt);
+// int coap_serializer_add_opt_empty(coap_serializer* s, uint16_t opt);
 
 /**
  * Add an opaque option.
  */
-int coap_serializer_add_opt_opaque(coap_serializer* s, uint16_t opt,
-                                   const char* val, size_t len);
+// int coap_serializer_add_opt_opaque(coap_serializer* s, uint16_t opt,
+//                                   const char* val, size_t len);
 
 /**
  * Add a uint option.
@@ -140,8 +139,8 @@ int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
 /**
  * Add a string option.
  */
-int coap_serializer_add_opt_string(coap_serializer* s, uint16_t opt,
-                                   const char* val, size_t len);
+// int coap_serializer_add_opt_string(coap_serializer* s, uint16_t opt,
+//                                   const char* val, size_t len);
 
 /**
  * Set a payload.

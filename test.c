@@ -302,11 +302,11 @@ void test_coap_sample_readme() {
   assert(coap_serializer_begin(s, buf, 2048) == COAP_OK);
   assert(coap_serializer_set_header(s, T_CON | C_GET, "token",
                                     L("token") - 1) == COAP_OK);
-  assert(coap_serializer_add_opt_string(s, O_URI_HOST, "example.com",
-                                        L("example.com")) == COAP_OK);
+  assert(coap_serializer_add_opt(s, O_URI_HOST, "example.com",
+                                 L("example.com")) == COAP_OK);
   assert(coap_serializer_add_opt_uint(s, O_URI_PORT, 5683) == COAP_OK);
-  assert(coap_serializer_add_opt_string(s, O_URI_PATH, "temperature",
-                                        L("temperature")) == COAP_OK);
+  assert(coap_serializer_add_opt(s, O_URI_PATH, "temperature",
+                                 L("temperature")) == COAP_OK);
   assert(coap_parser_init(&p, malloc(coap_parser_size()), coap_parser_size()) ==
          COAP_OK);
   assert(coap_parser_exec(p, buf, 2048) == COAP_OK);
