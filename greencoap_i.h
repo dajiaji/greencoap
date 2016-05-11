@@ -14,8 +14,6 @@ extern "C" {
 #define COAP_LEN_HEADER 4
 #define COAP_MAXLEN_TOKEN 8
 
-//#define IS_REQUEST_(msg_type) (((msg_type)&0x1001) == 1)
-
 // typedef uint8_t coap_bool_t;
 
 /**
@@ -36,14 +34,6 @@ typedef enum coap_parser_state_t {
   COAP_P_STATE_READ_HEADER,
   COAP_P_STATE_READ_PAYLOAD,
 } coap_parser_state_t;
-
-/**
- * General buffer.
- */
-// typedef struct coap_buf_t {
-//  uint16_t len;
-//  const char* val;
-//} coap_buf_t;
 
 /**
  * CoAP serializer.

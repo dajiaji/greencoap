@@ -101,35 +101,20 @@ typedef struct coap_parser coap_parser;
 /**
  * Create a CoAP serializer (coap_serializer) with fixed size memory space.
  */
-int coap_serializer_init(coap_serializer** s, void* buf, size_t len);
+int coap_serializer_create(coap_serializer** s, void* buf, size_t len,
+                           char* dst_buf, size_t dst_len);
 
 /**
- * Initialize the CoAP serializer with fixed size write buffer.
+ * Initialize a CoAP serializer with a CoAP header and a token.
  */
-int coap_serializer_begin(coap_serializer* s, char* buf, size_t len);
+int coap_serializer_init(coap_serializer* s, uint32_t header, const char* token,
+                         uint8_t token_len);
 
 /**
- * Set a CoAP header and a token.
- */
-int coap_serializer_set_header(coap_serializer* s, uint32_t header,
-                               const char* token, uint8_t token_len);
-
-/**
- * Add a raw option.
+ * Add an option.
  */
 int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
                             size_t len);
-/**
- * Add an empty option.
- */
-// int coap_serializer_add_opt_empty(coap_serializer* s, uint16_t opt);
-
-/**
- * Add an opaque option.
- */
-// int coap_serializer_add_opt_opaque(coap_serializer* s, uint16_t opt,
-//                                   const char* val, size_t len);
-
 /**
  * Add a uint option.
  */
@@ -137,21 +122,14 @@ int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
                                  uint32_t val);
 
 /**
- * Add a string option.
+ * Execute (Finalize) the CoAP serializer with a payload.
  */
-// int coap_serializer_add_opt_string(coap_serializer* s, uint16_t opt,
-//                                   const char* val, size_t len);
-
-/**
- * Set a payload.
- */
-int coap_serializer_set_payload(coap_serializer* s, const char* buf,
-                                size_t len);
+int coap_serializer_exec(coap_serializer* s, const char* buf, size_t len);
 
 /**
  * Create a CoAP parser (coap_parser) with fixed size memory space.
  */
-int coap_parser_init(coap_parser** p, const char* buf, size_t len);
+int coap_parser_create(coap_parser** p, const char* buf, size_t len);
 
 /**
  * Parse a given buffer as a CoAP message.
