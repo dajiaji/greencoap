@@ -23,6 +23,7 @@ extern "C" {
  */
 typedef enum coap_serializer_state_t {
   COAP_S_STATE_INIT = 0,
+  COAP_S_STATE_ASSIGNED_BUFFER,
   COAP_S_STATE_WRITTEN_HEADER,
   COAP_S_STATE_WRITTEN_PAYLOAD,
 } coap_serializer_state_t;

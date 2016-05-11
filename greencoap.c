@@ -3,7 +3,10 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 
-#define IS_WELL_KNOWN_(x) (x <= 255)
+static uint8_t IS_WELL_KNOWN_(x) {
+  if (x <= 255) return 1;
+  return 0;
+}
 
 static void coap_s_clear_(coap_serializer* s) {
   assert(s != NULL && s->buf != NULL && s->buf_len > 0);
@@ -78,7 +81,7 @@ int coap_serializer_begin(coap_serializer* s, char* buf, size_t len) {
   s->buf_len = len;
   s->buf = buf;
   s->cursor = 0;
-  s->state = COAP_S_STATE_INIT;
+  s->state = COAP_S_STATE_ASSIGNED_BUFFER;
   return COAP_OK;
 }
 
@@ -88,11 +91,31 @@ int coap_serializer_set_header(coap_serializer* s, uint32_t header,
       (token != NULL && token_len == 0)) {
     return COAP_ERR_INVALID_ARGUMENT;
   }
+  if (s->state == COAP_S_STATE_INIT) {
+    return COAP_ERR_INVALID_CALL;
+  }
   switch (header & 0x00FF0000) {
+    case 0:
+      switch (header & 0x30000000) {
+        case T_ACK:
+        case T_RST:
+          break;
+        default:
+          return COAP_ERR_INVALID_ARGUMENT;
+      }
+      break;
     case C_GET:
     case C_POST:
     case C_PUT:
     case C_DELETE:
+      switch (header & 0x30000000) {
+        case T_CON:
+        case T_NON:
+          break;
+        default:
+          return COAP_ERR_INVALID_ARGUMENT;
+      }
+      break;
     case C_CREATED:
     case C_DELETED:
     case C_VALID:
@@ -114,6 +137,12 @@ int coap_serializer_set_header(coap_serializer* s, uint32_t header,
     case C_SERVICE_UNAVAILABLE:
     case C_GATEWAY_TIMEOUT:
     case C_PROXYING_NOT_SUPPORTED:
+      switch (header & 0x30000000) {
+        case T_RST:
+          return COAP_ERR_INVALID_ARGUMENT;
+        default:
+          break;
+      }
       break;
     default:
       return COAP_ERR_INVALID_ARGUMENT;
