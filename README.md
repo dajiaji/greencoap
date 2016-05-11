@@ -30,7 +30,7 @@ coap_serializer_set_payload(s, "22.3 C", sizeof("22.3 C")-1);
 coap_parser* p = NULL;
 coap_parser_init(&p, malloc(coap_parser_size()), coap_parser_size());
 coap_parser_exec(p, buf, 2048);
-coap_parser_get_payload(p, &res, &len);
+coap_parser_get_payload(p, &res, &res_len);
 
 printf("payload: %.*s\n", res_len, res); // 22.3 C
 
