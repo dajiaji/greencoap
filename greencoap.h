@@ -71,6 +71,7 @@ typedef enum coap_code_t {
  * CoAP options.
  */
 typedef enum coap_opt_number_t {
+  // RESERVED = 0,
   O_IF_MATCH = 1,
   O_URI_HOST = 3,
   O_ETAG = 4,
@@ -86,10 +87,10 @@ typedef enum coap_opt_number_t {
   O_PROXY_URI = 35,
   O_PROXY_SCHEME = 39,
   O_SIZE1 = 60,
-  // O_RESERVED = 128,
-  // O_RESERVED = 132,
-  // O_RESERVED = 136,
-  // O_RESERVED = 140,
+  // RESERVED = 128,
+  // RESERVED = 132,
+  // RESERVED = 136,
+  // RESERVED = 140,
 } coap_opt_number_t;
 
 /** CoAP serializer */

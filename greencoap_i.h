@@ -14,27 +14,6 @@ extern "C" {
 #define COAP_LEN_HEADER 4
 #define COAP_MAXLEN_TOKEN 8
 
-// typedef uint8_t coap_bool_t;
-
-/**
- * Internal states for coap_serializer.
- */
-typedef enum coap_serializer_state_t {
-  COAP_S_STATE_INIT = 0,
-  COAP_S_STATE_ASSIGNED_BUFFER,
-  COAP_S_STATE_WRITTEN_HEADER,
-  COAP_S_STATE_WRITTEN_PAYLOAD,
-} coap_serializer_state_t;
-
-/**
- * Internal states for coap_parser.
- */
-typedef enum coap_parser_state_t {
-  COAP_P_STATE_INIT = 0,
-  COAP_P_STATE_READ_HEADER,
-  COAP_P_STATE_READ_PAYLOAD,
-} coap_parser_state_t;
-
 /**
  * CoAP serializer.
  */
@@ -43,8 +22,8 @@ struct coap_serializer {
   char* buf;
   size_t cursor;
   size_t payload;
-  coap_serializer_state_t state;
-  uint32_t sum_of_delta;
+  uint16_t sum_of_delta;
+  uint8_t executed;
 };
 
 /**
@@ -54,10 +33,10 @@ struct coap_parser {
   size_t buf_len;
   const char* buf;
   size_t cursor;
+  size_t payload;
   uint32_t header;
   uint8_t token_len;
-  size_t payload;
-  coap_parser_state_t state;
+  uint8_t executed;
 };
 
 #ifdef __cplusplus

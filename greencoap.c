@@ -115,7 +115,8 @@ int coap_serializer_create(coap_serializer** s, void* buf, size_t len,
   (*s)->buf_len = dst_len;
   (*s)->buf = dst_buf;
   (*s)->cursor = 0;
-  (*s)->state = COAP_S_STATE_INIT;
+  (*s)->sum_of_delta = 0;
+  (*s)->executed = 0;
   return COAP_OK;
 }
 
@@ -130,11 +131,11 @@ int coap_serializer_init(coap_serializer* s, uint32_t h, const char* token,
   }
   s->cursor = 0;
   s->sum_of_delta = 0;
+  s->executed = 0;
   coap_s_write_uint32_(s, htonl(COAP_VERSION | h | (token_len << 24)));
   if (token != NULL && coap_s_write_(s, token, token_len)) {  // != 0
     return COAP_ERR_LIMIT;
   }
-  s->state = COAP_S_STATE_WRITTEN_HEADER;
   return COAP_OK;
 }
 
@@ -167,7 +168,7 @@ int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
   if (s == NULL || len > 65535 + 269) {
     return COAP_ERR_INVALID_ARGUMENT;
   }
-  if (s->state != COAP_S_STATE_WRITTEN_HEADER) {
+  if (s->executed) {
     return COAP_ERR_INVALID_CALL;
   }
   if (is_well_known_(opt)) {
@@ -331,27 +332,27 @@ int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
 
 int coap_serializer_exec(coap_serializer* s, const char* payload,
                          size_t payload_len) {
-  if (s == NULL || payload == NULL || payload_len == 0) {
+  if (s == NULL) {
     return COAP_ERR_INVALID_ARGUMENT;
   }
-  if (s->state == COAP_S_STATE_INIT) {
-    return COAP_ERR_INVALID_CALL;
+  if (payload == NULL || payload_len == 0) {
+    s->executed = 1;
+    return COAP_OK;
   }
-  if (s->state == COAP_S_STATE_WRITTEN_PAYLOAD) {
+  if (s->executed) {
     s->cursor = s->payload;
-  } else {
+  }
+  if (!s->executed || s->sum_of_delta == 0) {
     if (coap_s_write_uint8_(s, 0xFF)) {
-      goto error;
+      return COAP_ERR_LIMIT;
     }
-    s->payload = s->cursor;
   }
+  s->payload = s->cursor;
   if (coap_s_write_(s, payload, payload_len)) {
-    goto error;
+    return COAP_ERR_LIMIT;
   }
-  s->state = COAP_S_STATE_WRITTEN_PAYLOAD;
+  s->executed = 1;
   return COAP_OK;
-error:
-  return COAP_ERR_LIMIT;
 }
 
 int coap_parser_create(coap_parser** p, const char* buf, size_t len) {
@@ -362,7 +363,7 @@ int coap_parser_create(coap_parser** p, const char* buf, size_t len) {
   (*p)->buf_len = 0;
   (*p)->buf = NULL;
   (*p)->cursor = 0;
-  (*p)->state = COAP_P_STATE_INIT;
+  (*p)->executed = 0;
   return COAP_OK;
 }
 
@@ -373,6 +374,7 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
   p->buf_len = len;
   p->buf = buf;
   p->cursor = 0;
+  p->executed = 0;
 
   // Parse CoAP header.
   if (coap_p_read_(p, (char*)&p->header, 4)) {
@@ -390,7 +392,7 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
     return COAP_ERR_SYNTAX;
   }
   p->cursor += p->token_len;
-  p->state = COAP_P_STATE_READ_HEADER;
+  // p->state = COAP_P_STATE_READ_HEADER;
   // printf("header parsed. token_len=%d\n", p->token_len);
 
   // Parse CoAP options.
@@ -398,12 +400,11 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
   uint16_t opt;
   uint16_t opt_len;
   uint8_t b;
-  // int i = 0;
   while (p->cursor < p->buf_len) {
     coap_p_read_(p, (char*)&b, 1);
     if (b == 0xFF) {
       p->payload = p->cursor;
-      p->state = COAP_P_STATE_READ_PAYLOAD;
+      p->executed = 1;
       return COAP_OK;
     }
     opt = b >> 4;
@@ -519,6 +520,7 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
     // printf("option parsed. %d\n", opt);
     p->cursor += opt_len;
   }
+  p->executed = 1;
   return COAP_OK;
 }
 
