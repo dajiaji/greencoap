@@ -108,7 +108,7 @@ int coap_serializer_create(coap_serializer** s, void* buf, size_t len,
 /**
  * Initialize a CoAP serializer with a CoAP header and a token.
  */
-int coap_serializer_init(coap_serializer* s, uint32_t header, const char* token,
+int coap_serializer_init(coap_serializer* s, uint32_t header,
                          uint8_t token_len);
 
 /**
@@ -125,7 +125,9 @@ int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
 /**
  * Execute (Finalize) the CoAP serializer with a payload.
  */
-int coap_serializer_exec(coap_serializer* s, const char* buf, size_t len);
+int coap_serializer_exec(coap_serializer* s, uint16_t mid, const char* token,
+                         const char* payload, size_t payload_len,
+                         size_t* msg_len);
 
 /**
  * Create a CoAP parser (coap_parser) with fixed size memory space.

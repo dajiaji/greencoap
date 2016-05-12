@@ -1,5 +1,4 @@
 #include "greencoap_i.h"
-//#include <assert.h>
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <string.h>
@@ -72,8 +71,6 @@ static int validate_msg_type_code_(uint32_t header) {
 }
 
 static int coap_s_write_(coap_serializer* s, const char* src, size_t src_len) {
-  // assert(s != NULL && s->buf != NULL && s->buf_len > 0 && src != NULL &&
-  //       src_len > 0);
   if (s->buf_len - s->cursor < src_len) {
     return -1;
   }
@@ -95,8 +92,6 @@ static int coap_s_write_uint32_(coap_serializer* s, uint32_t src) {
 }
 
 static int coap_p_read_(coap_parser* p, char* dst, size_t dst_len) {
-  // assert(p != NULL && p->buf != NULL && p->buf_len > 0 && dst != NULL &&
-  //       dst_len > 0);
   if (p->buf_len - p->cursor < dst_len) {
     return -1;
   }
@@ -116,14 +111,13 @@ int coap_serializer_create(coap_serializer** s, void* buf, size_t len,
   (*s)->buf = dst_buf;
   (*s)->cursor = 0;
   (*s)->sum_of_delta = 0;
+  (*s)->token_len = 0;
   (*s)->executed = 0;
   return COAP_OK;
 }
 
-int coap_serializer_init(coap_serializer* s, uint32_t h, const char* token,
-                         uint8_t token_len) {
-  if (s == NULL || token_len > COAP_MAXLEN_TOKEN ||
-      (token != NULL && token_len == 0)) {
+int coap_serializer_init(coap_serializer* s, uint32_t h, uint8_t token_len) {
+  if (s == NULL || token_len > COAP_MAXLEN_TOKEN) {
     return COAP_ERR_INVALID_ARGUMENT;
   }
   if (validate_msg_type_code_(h)) {
@@ -131,11 +125,13 @@ int coap_serializer_init(coap_serializer* s, uint32_t h, const char* token,
   }
   s->cursor = 0;
   s->sum_of_delta = 0;
+  s->token_len = token_len;
   s->executed = 0;
   coap_s_write_uint32_(s, htonl(COAP_VERSION | h | (token_len << 24)));
-  if (token != NULL && coap_s_write_(s, token, token_len)) {  // != 0
+  if (s->cursor + token_len > s->buf_len) {
     return COAP_ERR_LIMIT;
   }
+  s->cursor += token_len;
   return COAP_OK;
 }
 
@@ -258,7 +254,7 @@ int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
   }
   if (len < 13) {
     opt_delta_and_len |= len;
-  } else if (len <= 255 + 13) {
+  } else if (len <= 255 + 13) {  // 255 + 13
     opt_delta_and_len |= 13;
   } else {
     opt_delta_and_len |= 14;
@@ -330,12 +326,19 @@ int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
   return coap_serializer_add_opt(s, opt, (const char*)&nbo_val, 4);
 }
 
-int coap_serializer_exec(coap_serializer* s, const char* payload,
-                         size_t payload_len) {
+int coap_serializer_exec(coap_serializer* s, uint16_t mid, const char* token,
+                         const char* payload, size_t payload_len,
+                         size_t* msg_len) {
+  uint16_t nbo_mid = htons(mid);
   if (s == NULL) {
     return COAP_ERR_INVALID_ARGUMENT;
   }
+  memcpy(&s->buf[2], &nbo_mid, 2);
+  if (token) {
+    memcpy(&s->buf[4], token, s->token_len);
+  }
   if (payload == NULL || payload_len == 0) {
+    *msg_len = s->cursor;
     s->executed = 1;
     return COAP_OK;
   }
@@ -351,6 +354,7 @@ int coap_serializer_exec(coap_serializer* s, const char* payload,
   if (coap_s_write_(s, payload, payload_len)) {
     return COAP_ERR_LIMIT;
   }
+  *msg_len = s->cursor;
   s->executed = 1;
   return COAP_OK;
 }

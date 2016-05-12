@@ -23,6 +23,7 @@ struct coap_serializer {
   size_t cursor;
   size_t payload;
   uint16_t sum_of_delta;
+  uint8_t token_len;
   uint8_t executed;
 };
 
