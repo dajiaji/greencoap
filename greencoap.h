@@ -142,12 +142,22 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len);
 /**
  * Get the CoAP message type.
  */
-int coap_parser_get_type(const coap_parser* p, coap_type_t* type);
+int coap_parser_get_type(const coap_parser* p, coap_type_t* res);
 
 /**
  * Get the CoAP message code.
  */
-int coap_parser_get_code(const coap_parser* p, coap_code_t* code);
+int coap_parser_get_code(const coap_parser* p, coap_code_t* res);
+
+/**
+ * Get the CoAP message id.
+ */
+int coap_parser_get_mid(const coap_parser* p, uint16_t* res);
+
+/**
+ * Get the CoAP message token.
+ */
+int coap_parser_get_token(const coap_parser* p, const char** res, uint8_t* len);
 
 /**
  * Get the value of path.

@@ -532,12 +532,48 @@ int coap_parser_get_type(const coap_parser* p, coap_type_t* res) {
   if (p == NULL) {
     return COAP_ERR_INVALID_ARGUMENT;
   }
+  if (!p->executed) {
+    return COAP_ERR_INVALID_CALL;
+  }
+  *res = p->header & 0x30000000;
   return COAP_OK;
 }
 
 int coap_parser_get_code(const coap_parser* p, coap_code_t* res) {
   if (p == NULL) {
     return COAP_ERR_INVALID_ARGUMENT;
+  }
+  if (!p->executed) {
+    return COAP_ERR_INVALID_CALL;
+  }
+  *res = p->header & 0x00FF0000;
+  return COAP_OK;
+}
+
+int coap_parser_get_mid(const coap_parser* p, uint16_t* res) {
+  if (p == NULL) {
+    return COAP_ERR_INVALID_ARGUMENT;
+  }
+  if (!p->executed) {
+    return COAP_ERR_INVALID_CALL;
+  }
+  *res = p->header & 0x0000FFFF;
+  return COAP_OK;
+}
+
+int coap_parser_get_token(const coap_parser* p, const char** res,
+                          uint8_t* len) {
+  if (p == NULL) {
+    return COAP_ERR_INVALID_ARGUMENT;
+  }
+  if (!p->executed) {
+    return COAP_ERR_INVALID_CALL;
+  }
+  *len = p->token_len;
+  if (p->token_len > 0) {
+    *res = &p->buf[4];
+  } else {
+    *res = NULL;
   }
   return COAP_OK;
 }
@@ -546,6 +582,9 @@ int coap_parser_get_path(const coap_parser* p, const char** res, size_t* len) {
   if (p == NULL) {
     return COAP_ERR_INVALID_ARGUMENT;
   }
+  if (!p->executed) {
+    return COAP_ERR_INVALID_CALL;
+  }
   return COAP_OK;
 }
 
@@ -553,6 +592,9 @@ int coap_parser_get_payload(const coap_parser* p, const char** res,
                             size_t* len) {
   if (p == NULL) {
     return COAP_ERR_INVALID_ARGUMENT;
+  }
+  if (!p->executed) {
+    return COAP_ERR_INVALID_CALL;
   }
   *res = &p->buf[p->payload];
   *len = p->buf_len - p->payload;

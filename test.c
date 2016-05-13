@@ -251,6 +251,8 @@ void test_coap_sample_readme() {
   const char* payload = NULL;
   size_t payload_len = 0;
   size_t msg_size = 0;
+  coap_type_t type;
+  coap_code_t code;
 
   assert(coap_serializer_create(&s, malloc(coap_serializer_size()),
                                 coap_serializer_size(), buf, 64) == COAP_OK);
@@ -268,6 +270,10 @@ void test_coap_sample_readme() {
   assert(coap_parser_get_payload(p, &payload, &payload_len) == COAP_OK);
   assert(payload_len = L("22.3 C"));
   assert(strncmp(payload, "22.3 C", payload_len) == 0);
+  assert(coap_parser_get_type(p, &type) == COAP_OK);
+  assert(type == T_CON);
+  assert(coap_parser_get_code(p, &code) == COAP_OK);
+  assert(code == C_POST);
   free(s);
   free(p);
   return;
