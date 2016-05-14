@@ -368,6 +368,34 @@ int coap_parser_create(coap_parser** p, const char* buf, size_t len) {
   (*p)->buf = NULL;
   (*p)->cursor = 0;
   (*p)->executed = 0;
+  (*p)->cookie = NULL;
+  (*p)->on_begin = NULL;
+  (*p)->on_header = NULL;
+  (*p)->on_opt = NULL;
+  (*p)->on_payload = NULL;
+  (*p)->on_complete = NULL;
+  return COAP_OK;
+}
+
+int coap_parser_init(coap_parser* p, const coap_parser_settings* s) {
+  if (p == NULL) {
+    return COAP_ERR_INVALID_ARGUMENT;
+  }
+  if (s == NULL) {
+    p->cookie = NULL;
+    p->on_begin = NULL;
+    p->on_header = NULL;
+    p->on_opt = NULL;
+    p->on_payload = NULL;
+    p->on_complete = NULL;
+  } else {
+    p->cookie = s->cookie;
+    p->on_begin = s->on_begin;
+    p->on_header = s->on_header;
+    p->on_opt = s->on_opt;
+    p->on_payload = s->on_payload;
+    p->on_complete = s->on_complete;
+  }
   return COAP_OK;
 }
 
@@ -381,6 +409,9 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
   p->executed = 0;
 
   // Parse CoAP header.
+  if (p->on_begin) {
+    p->on_begin(p->cookie);
+  }
   if (coap_p_read_(p, (char*)&p->header, 4)) {
     return COAP_ERR_SYNTAX;
   }
@@ -395,9 +426,11 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
   if (p->token_len > 8) {
     return COAP_ERR_SYNTAX;
   }
+  if (p->on_header) {
+    p->on_header(p->cookie, p->header & 0x30000000, p->header & 0x00FF0000,
+                 p->header & 0x0000FFFF, &p->buf[p->cursor], p->token_len);
+  }
   p->cursor += p->token_len;
-  // p->state = COAP_P_STATE_READ_HEADER;
-  // printf("header parsed. token_len=%d\n", p->token_len);
 
   // Parse CoAP options.
   uint16_t sum_of_delta = 0;
@@ -409,6 +442,12 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
     if (b == 0xFF) {
       p->payload = p->cursor;
       p->executed = 1;
+      if (p->on_payload) {
+        p->on_payload(p->cookie, &p->buf[p->cursor], p->buf_len - p->cursor);
+      }
+      if (p->on_complete) {
+        p->on_complete(p->cookie);
+      }
       return COAP_OK;
     }
     opt = b >> 4;
@@ -521,10 +560,15 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
     }
     opt += sum_of_delta;
     sum_of_delta = opt;
-    // printf("option parsed. %d\n", opt);
+    if (p->on_opt) {
+      p->on_opt(p->cookie, opt, &p->buf[p->cursor], opt_len);
+    }
     p->cursor += opt_len;
   }
   p->executed = 1;
+  if (p->on_complete) {
+    p->on_complete(p->cookie);
+  }
   return COAP_OK;
 }
 

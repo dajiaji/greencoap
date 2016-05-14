@@ -99,6 +99,23 @@ typedef struct coap_serializer coap_serializer;
 /** CoAP parser */
 typedef struct coap_parser coap_parser;
 
+/** CoAP parser callback functions */
+typedef void (*coap_parser_cb_t)(void*);
+typedef void (*coap_parser_cb_header_t)(void*, coap_type_t, coap_code_t,
+                                        uint16_t, const char*, uint8_t);
+typedef void (*coap_parser_cb_opt_t)(void*, uint16_t, const void*, uint16_t);
+typedef void (*coap_parser_cb_payload_t)(void*, const char*, size_t);
+
+/** CoAP parser */
+typedef struct coap_parser_settings {
+  void* cookie;
+  coap_parser_cb_t on_begin;
+  coap_parser_cb_header_t on_header;
+  coap_parser_cb_opt_t on_opt;
+  coap_parser_cb_payload_t on_payload;
+  coap_parser_cb_t on_complete;
+} coap_parser_settings;
+
 /**
  * Create a CoAP serializer (coap_serializer) with fixed size memory space.
  */
@@ -133,6 +150,11 @@ int coap_serializer_exec(coap_serializer* s, uint16_t mid, const char* token,
  * Create a CoAP parser (coap_parser) with fixed size memory space.
  */
 int coap_parser_create(coap_parser** p, const char* buf, size_t len);
+
+/**
+ * Initialize a CoAP parser (coap_parser) with fixed size memory space.
+ */
+int coap_parser_init(coap_parser* p, const coap_parser_settings* s);
 
 /**
  * Parse a given buffer as a CoAP message.

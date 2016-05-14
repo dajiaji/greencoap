@@ -38,6 +38,12 @@ struct coap_parser {
   uint32_t header;
   uint8_t token_len;
   uint8_t executed;
+  void* cookie;
+  coap_parser_cb_t on_begin;
+  coap_parser_cb_header_t on_header;
+  coap_parser_cb_opt_t on_opt;
+  coap_parser_cb_payload_t on_payload;
+  coap_parser_cb_t on_complete;
 };
 
 #ifdef __cplusplus
