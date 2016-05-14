@@ -20,7 +20,7 @@ const char* res = NULL;
 // How to use coap_serializer.
 coap_serializer* s = NULL;
 coap_serializer_create(&s, malloc(coap_serializer_size()), coap_serializer_size(), buf, 64);
-coap_serializer_init(s, T_CON | C_POST, 1);
+coap_serializer_init(s, T_CON, C_POST, 1);
 coap_serializer_add_opt(s, O_URI_HOST, "example.com", sizeof("example.com")-1);
 coap_serializer_add_opt_uint(s, O_URI_PORT, 5683);
 coap_serializer_add_opt(s, O_URI_PATH, "temperature", sizeof("temperature")-1);

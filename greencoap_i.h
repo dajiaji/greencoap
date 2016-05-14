@@ -35,7 +35,10 @@ struct coap_parser {
   const char* buf;
   size_t cursor;
   size_t payload;
-  uint32_t header;
+  uint8_t version;
+  uint8_t type;
+  uint8_t code;
+  uint16_t mid;
   uint8_t token_len;
   uint8_t executed;
   void* cookie;

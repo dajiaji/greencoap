@@ -13,7 +13,7 @@ extern "C" {
  */
 typedef enum coap_status_t {
   COAP_OK = 0,
-  COAP_ERR_INVALID_ARGUMENT = -1,
+  COAP_ERR_ARG = -1,
   COAP_ERR_LIMIT = -2,
   COAP_ERR_INVALID_CALL = -3,
   COAP_ERR_SYNTAX = -4,
@@ -27,9 +27,9 @@ typedef enum coap_status_t {
  */
 typedef enum coap_type_t {
   T_CON = 0,
-  T_NON = 1 << 28,
-  T_ACK = 2 << 28,
-  T_RST = 3 << 28,
+  T_NON = 1,
+  T_ACK = 2,
+  T_RST = 3,
 } coap_type_t;
 
 /**
@@ -37,34 +37,34 @@ typedef enum coap_type_t {
  */
 typedef enum coap_code_t {
   // 0.xx
-  C_GET = 1 << 16,     // 0.01
-  C_POST = 2 << 16,    // 0.02
-  C_PUT = 3 << 16,     // 0.03
-  C_DELETE = 4 << 16,  // 0.04
+  C_GET = 1,     // 0.01
+  C_POST = 2,    // 0.02
+  C_PUT = 3,     // 0.03
+  C_DELETE = 4,  // 0.04
   // 2.xx
-  C_CREATED = 2 << 21 | 1 << 16,  // 2.01
-  C_DELETED = 2 << 21 | 2 << 16,  // 2.02
-  C_VALID = 2 << 21 | 3 << 16,    // 2.03
-  C_CHANGED = 2 << 21 | 4 << 16,  // 2.04
-  C_CONTENT = 2 << 21 | 5 << 16,  // 2.05
+  C_CREATED = 2 << 5 | 1,  // 2.01
+  C_DELETED = 2 << 5 | 2,  // 2.02
+  C_VALID = 2 << 5 | 3,    // 2.03
+  C_CHANGED = 2 << 5 | 4,  // 2.04
+  C_CONTENT = 2 << 5 | 5,  // 2.05
   // 4.xx
-  C_BAD_REQUEST = 4 << 21,                            // 4.00
-  C_UNAUTHORIZED = 4 << 21 | 1 << 16,                 // 4.01
-  C_BAD_OPTION = 4 << 21 | 2 << 16,                   // 4.02
-  C_FORBIDDEN = 4 << 21 | 3 << 16,                    // 4.03
-  C_NOT_FOUND = 4 << 21 | 4 << 16,                    // 4.04
-  C_METHOD_NOT_ALLOWED = 4 << 21 | 5 << 16,           // 4.05
-  C_NOT_ACCEPTABLE = 4 << 21 | 6 << 16,               // 4.06
-  C_PRECONDITION_FAILED = 4 << 21 | 12 << 16,         // 4.12
-  C_REQUEST_ENTITY_TOO_LARGE = 4 << 21 | 13 << 16,    // 4.13
-  C_UNSUPPORTED_CONTENT_FORMAT = 4 << 21 | 15 << 16,  // 4.15
+  C_BAD_REQUEST = 4 << 5,                      // 4.00
+  C_UNAUTHORIZED = 4 << 5 | 1,                 // 4.01
+  C_BAD_OPTION = 4 << 5 | 2,                   // 4.02
+  C_FORBIDDEN = 4 << 5 | 3,                    // 4.03
+  C_NOT_FOUND = 4 << 5 | 4,                    // 4.04
+  C_METHOD_NOT_ALLOWED = 4 << 5 | 5,           // 4.05
+  C_NOT_ACCEPTABLE = 4 << 5 | 6,               // 4.06
+  C_PRECONDITION_FAILED = 4 << 5 | 12,         // 4.12
+  C_REQUEST_ENTITY_TOO_LARGE = 4 << 5 | 13,    // 4.13
+  C_UNSUPPORTED_CONTENT_FORMAT = 4 << 5 | 15,  // 4.15
   // 5.xx
-  C_INTERNAL_SERVER_ERROR = 5 << 21,             // 5.00
-  C_NOT_IMPLEMENTED = 5 << 21 | 1 << 16,         // 5.01
-  C_BAD_GATEWAY = 5 << 21 | 2 << 16,             // 5.02
-  C_SERVICE_UNAVAILABLE = 5 << 21 | 3 << 16,     // 5.03
-  C_GATEWAY_TIMEOUT = 5 << 21 | 4 << 16,         // 5.04
-  C_PROXYING_NOT_SUPPORTED = 5 << 21 | 5 << 16,  // 5.05
+  C_INTERNAL_SERVER_ERROR = 5 << 5,       // 5.00
+  C_NOT_IMPLEMENTED = 5 << 5 | 1,         // 5.01
+  C_BAD_GATEWAY = 5 << 5 | 2,             // 5.02
+  C_SERVICE_UNAVAILABLE = 5 << 5 | 3,     // 5.03
+  C_GATEWAY_TIMEOUT = 5 << 5 | 4,         // 5.04
+  C_PROXYING_NOT_SUPPORTED = 5 << 5 | 5,  // 5.05
 } coap_code_t;
 
 /**
@@ -76,6 +76,7 @@ typedef enum coap_opt_number_t {
   O_URI_HOST = 3,
   O_ETAG = 4,
   O_IF_NONE_MATCH = 5,
+  O_OBSERVE = 6,
   O_URI_PORT = 7,
   O_LOCATION_PATH = 8,
   O_URI_PATH = 11,
@@ -125,7 +126,7 @@ int coap_serializer_create(coap_serializer** s, void* buf, size_t len,
 /**
  * Initialize a CoAP serializer with a CoAP header and a token.
  */
-int coap_serializer_init(coap_serializer* s, uint32_t header,
+int coap_serializer_init(coap_serializer* s, uint8_t type, uint8_t code,
                          uint8_t token_len);
 
 /**

@@ -32,30 +32,22 @@ void test_coap_serializer_init_request() {
   char buf[2048] = {};
   coap_serializer_create(&s, malloc(coap_serializer_size()),
                          coap_serializer_size(), buf, 2048);
-  assert(coap_serializer_init(s, T_CON | C_GET, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_POST, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_PUT, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_DELETE, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_GET, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_POST, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_PUT, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_DELETE, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_GET, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_ACK | C_POST, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_ACK | C_PUT, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_ACK | C_DELETE, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_GET, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_POST, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_PUT, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_DELETE, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
+  assert(coap_serializer_init(s, T_CON, C_GET, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_POST, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_PUT, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_DELETE, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_GET, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_POST, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_PUT, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_DELETE, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_GET, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_ACK, C_POST, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_ACK, C_PUT, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_ACK, C_DELETE, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_GET, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_POST, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_PUT, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_DELETE, 1) == COAP_ERR_ARG);
   free(s);
   return;
 }
@@ -65,34 +57,29 @@ void test_coap_serializer_init_response_2xx() {
   char buf[2048] = {};
   coap_serializer_create(&s, malloc(coap_serializer_size()),
                          coap_serializer_size(), buf, 2048);
-  assert(coap_serializer_init(s, T_CON | C_CREATED, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_DELETED, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_VALID, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_CHANGED, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_CONTENT, L("token")) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_CREATED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_DELETED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_VALID, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_CHANGED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_CONTENT, 1) == COAP_OK);
 
-  assert(coap_serializer_init(s, T_NON | C_CREATED, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_DELETED, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_VALID, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_CHANGED, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_CONTENT, L("token")) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_CREATED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_DELETED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_VALID, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_CHANGED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_CONTENT, 1) == COAP_OK);
 
-  assert(coap_serializer_init(s, T_ACK | C_CREATED, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_DELETED, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_VALID, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_CHANGED, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_CONTENT, L("token")) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_CREATED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_DELETED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_VALID, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_CHANGED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_CONTENT, 1) == COAP_OK);
 
-  assert(coap_serializer_init(s, T_RST | C_CREATED, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_DELETED, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_VALID, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_CHANGED, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_CONTENT, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
+  assert(coap_serializer_init(s, T_RST, C_CREATED, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_DELETED, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_VALID, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_CHANGED, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_CONTENT, 1) == COAP_ERR_ARG);
   free(s);
   return;
 }
@@ -102,77 +89,59 @@ void test_coap_serializer_init_response_4xx() {
   char buf[2048] = {};
   coap_serializer_create(&s, malloc(coap_serializer_size()),
                          coap_serializer_size(), buf, 2048);
-  assert(coap_serializer_init(s, T_CON | C_BAD_REQUEST, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_UNAUTHORIZED, L("token")) ==
+  assert(coap_serializer_init(s, T_CON, C_BAD_REQUEST, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_UNAUTHORIZED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_BAD_OPTION, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_FORBIDDEN, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_NOT_FOUND, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_METHOD_NOT_ALLOWED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_NOT_ACCEPTABLE, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_PRECONDITION_FAILED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_REQUEST_ENTITY_TOO_LARGE, 1) ==
          COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_BAD_OPTION, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_FORBIDDEN, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_NOT_FOUND, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_METHOD_NOT_ALLOWED, L("token")) ==
+  assert(coap_serializer_init(s, T_CON, C_UNSUPPORTED_CONTENT_FORMAT, 1) ==
          COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_NOT_ACCEPTABLE, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_PRECONDITION_FAILED, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_REQUEST_ENTITY_TOO_LARGE,
-                              L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_UNSUPPORTED_CONTENT_FORMAT,
-                              L("token")) == COAP_OK);
 
-  assert(coap_serializer_init(s, T_NON | C_BAD_REQUEST, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_UNAUTHORIZED, L("token")) ==
+  assert(coap_serializer_init(s, T_NON, C_BAD_REQUEST, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_UNAUTHORIZED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_BAD_OPTION, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_FORBIDDEN, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_NOT_FOUND, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_METHOD_NOT_ALLOWED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_NOT_ACCEPTABLE, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_PRECONDITION_FAILED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_REQUEST_ENTITY_TOO_LARGE, 1) ==
          COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_BAD_OPTION, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_FORBIDDEN, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_NOT_FOUND, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_METHOD_NOT_ALLOWED, L("token")) ==
+  assert(coap_serializer_init(s, T_NON, C_UNSUPPORTED_CONTENT_FORMAT, 1) ==
          COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_NOT_ACCEPTABLE, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_PRECONDITION_FAILED, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_REQUEST_ENTITY_TOO_LARGE,
-                              L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_UNSUPPORTED_CONTENT_FORMAT,
-                              L("token")) == COAP_OK);
 
-  assert(coap_serializer_init(s, T_ACK | C_BAD_REQUEST, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_UNAUTHORIZED, L("token")) ==
+  assert(coap_serializer_init(s, T_ACK, C_BAD_REQUEST, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_UNAUTHORIZED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_BAD_OPTION, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_FORBIDDEN, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_NOT_FOUND, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_METHOD_NOT_ALLOWED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_NOT_ACCEPTABLE, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_PRECONDITION_FAILED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_REQUEST_ENTITY_TOO_LARGE, 1) ==
          COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_BAD_OPTION, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_FORBIDDEN, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_NOT_FOUND, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_METHOD_NOT_ALLOWED, L("token")) ==
+  assert(coap_serializer_init(s, T_ACK, C_UNSUPPORTED_CONTENT_FORMAT, 1) ==
          COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_NOT_ACCEPTABLE, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_PRECONDITION_FAILED, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_REQUEST_ENTITY_TOO_LARGE,
-                              L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_UNSUPPORTED_CONTENT_FORMAT,
-                              L("token")) == COAP_OK);
 
-  assert(coap_serializer_init(s, T_RST | C_BAD_REQUEST, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_UNAUTHORIZED, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_BAD_OPTION, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_FORBIDDEN, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_NOT_FOUND, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_METHOD_NOT_ALLOWED, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_NOT_ACCEPTABLE, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_PRECONDITION_FAILED, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_REQUEST_ENTITY_TOO_LARGE,
-                              L("token")) == COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_UNSUPPORTED_CONTENT_FORMAT,
-                              L("token")) == COAP_ERR_INVALID_ARGUMENT);
+  assert(coap_serializer_init(s, T_RST, C_BAD_REQUEST, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_UNAUTHORIZED, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_BAD_OPTION, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_FORBIDDEN, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_NOT_FOUND, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_METHOD_NOT_ALLOWED, 1) ==
+         COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_NOT_ACCEPTABLE, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_PRECONDITION_FAILED, 1) ==
+         COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_REQUEST_ENTITY_TOO_LARGE, 1) ==
+         COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_UNSUPPORTED_CONTENT_FORMAT, 1) ==
+         COAP_ERR_ARG);
   free(s);
   return;
 }
@@ -182,54 +151,39 @@ void test_coap_serializer_init_response_5xx() {
   char buf[2048] = {};
   coap_serializer_create(&s, malloc(coap_serializer_size()),
                          coap_serializer_size(), buf, 2048);
-  assert(coap_serializer_init(s, T_CON | C_INTERNAL_SERVER_ERROR, L("token")) ==
+  assert(coap_serializer_init(s, T_CON, C_INTERNAL_SERVER_ERROR, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_NOT_IMPLEMENTED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_BAD_GATEWAY, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_SERVICE_UNAVAILABLE, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_GATEWAY_TIMEOUT, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_PROXYING_NOT_SUPPORTED, 1) ==
          COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_NOT_IMPLEMENTED, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_BAD_GATEWAY, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_SERVICE_UNAVAILABLE, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_GATEWAY_TIMEOUT, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_PROXYING_NOT_SUPPORTED,
-                              L("token")) == COAP_OK);
 
-  assert(coap_serializer_init(s, T_NON | C_INTERNAL_SERVER_ERROR, L("token")) ==
+  assert(coap_serializer_init(s, T_NON, C_INTERNAL_SERVER_ERROR, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_NOT_IMPLEMENTED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_BAD_GATEWAY, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_SERVICE_UNAVAILABLE, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_GATEWAY_TIMEOUT, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_NON, C_PROXYING_NOT_SUPPORTED, 1) ==
          COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_NOT_IMPLEMENTED, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_BAD_GATEWAY, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_SERVICE_UNAVAILABLE, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_GATEWAY_TIMEOUT, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_NON | C_PROXYING_NOT_SUPPORTED,
-                              L("token")) == COAP_OK);
 
-  assert(coap_serializer_init(s, T_ACK | C_INTERNAL_SERVER_ERROR, L("token")) ==
+  assert(coap_serializer_init(s, T_ACK, C_INTERNAL_SERVER_ERROR, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_NOT_IMPLEMENTED, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_BAD_GATEWAY, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_SERVICE_UNAVAILABLE, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_GATEWAY_TIMEOUT, 1) == COAP_OK);
+  assert(coap_serializer_init(s, T_ACK, C_PROXYING_NOT_SUPPORTED, 1) ==
          COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_NOT_IMPLEMENTED, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_BAD_GATEWAY, L("token")) == COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_SERVICE_UNAVAILABLE, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_GATEWAY_TIMEOUT, L("token")) ==
-         COAP_OK);
-  assert(coap_serializer_init(s, T_ACK | C_PROXYING_NOT_SUPPORTED,
-                              L("token")) == COAP_OK);
 
-  assert(coap_serializer_init(s, T_RST | C_INTERNAL_SERVER_ERROR, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_NOT_IMPLEMENTED, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_BAD_GATEWAY, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_SERVICE_UNAVAILABLE, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_GATEWAY_TIMEOUT, L("token")) ==
-         COAP_ERR_INVALID_ARGUMENT);
-  assert(coap_serializer_init(s, T_RST | C_PROXYING_NOT_SUPPORTED,
-                              L("token")) == COAP_ERR_INVALID_ARGUMENT);
+  assert(coap_serializer_init(s, T_RST, C_INTERNAL_SERVER_ERROR, 1) ==
+         COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_NOT_IMPLEMENTED, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_BAD_GATEWAY, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_SERVICE_UNAVAILABLE, 1) ==
+         COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_GATEWAY_TIMEOUT, 1) == COAP_ERR_ARG);
+  assert(coap_serializer_init(s, T_RST, C_PROXYING_NOT_SUPPORTED, 1) ==
+         COAP_ERR_ARG);
   free(s);
   return;
 }
@@ -246,6 +200,7 @@ void test_coap_parser_size() {
 
 void test_coap_sample_readme() {
   char buf[64] = {};
+  char token = 0x20;
   coap_serializer* s = NULL;
   coap_parser* p = NULL;
   const char* payload = NULL;
@@ -256,14 +211,14 @@ void test_coap_sample_readme() {
 
   assert(coap_serializer_create(&s, malloc(coap_serializer_size()),
                                 coap_serializer_size(), buf, 64) == COAP_OK);
-  assert(coap_serializer_init(s, T_CON | C_POST, L("token")) == COAP_OK);
+  assert(coap_serializer_init(s, T_CON, C_POST, 1) == COAP_OK);
   assert(coap_serializer_add_opt(s, O_URI_HOST, "example.com",
                                  L("example.com")) == COAP_OK);
   assert(coap_serializer_add_opt_uint(s, O_URI_PORT, 5683) == COAP_OK);
   assert(coap_serializer_add_opt(s, O_URI_PATH, "temperature",
                                  L("temperature")) == COAP_OK);
-  assert(coap_serializer_exec(s, 0, "token", "22.3 C", L("22.3 C"),
-                              &msg_size) == COAP_OK);
+  assert(coap_serializer_exec(s, 0, &token, "22.3 C", L("22.3 C"), &msg_size) ==
+         COAP_OK);
   assert(coap_parser_create(&p, malloc(coap_parser_size()),
                             coap_parser_size()) == COAP_OK);
   assert(coap_parser_exec(p, buf, 64) == COAP_OK);
