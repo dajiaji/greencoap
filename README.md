@@ -1,12 +1,15 @@
 # GreenCoAP
 
-GreenCoAP is a CoAP (RFC7252: The Constrained Application Protocol) serializer/parser implementation written in C.
+GreenCoAP is a CoAP (RFC7252) parser/serializer implementation written in C.
 
 Features:
 
-  * Support RFC7252. <http://tools.ietf.org/html/rfc7252>
-  * Support static memory allocation. (No need to use malloc.)
-  * No dependencies.
+* Support following specifications related to CoAP.
+  * RFC7252: "The Constained Application Protocol" <http://tools.ietf.org/html/rfc7252>
+  * RFC7649: "Observing Resources in Constrained Application Protocol (CoAP)"  <http://tools.ietf.org/html/rfc7649>
+* Support static memory allocation. (No need to use malloc.)
+* No dependencies.
+* Small footprint.
 
 ## Usage
 

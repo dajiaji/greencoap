@@ -196,9 +196,17 @@ int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
           return COAP_ERR_INVALID_CALL;
         }
         break;
+      case O_OBSERVE:
+        if (len > 3) {
+          return COAP_ERR_ARG;
+        }
+        if (s->sum_of_delta == opt) {
+          return COAP_ERR_INVALID_CALL;
+        }
+        break;
       case O_MAX_AGE:
       case O_SIZE1:
-        if (len > 4 || len == 3) {
+        if (len > 4) {
           return COAP_ERR_ARG;
         }
         if (s->sum_of_delta == opt) {
@@ -296,11 +304,15 @@ error:
 
 int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
                                  uint32_t val) {
+  uint8_t nbo8;
+  uint16_t nbo16;
+  uint32_t nbo32;
   if (is_well_known_(opt)) {
     switch (opt) {
       case O_URI_PORT:
       case O_CONTENT_FORMAT:
       case O_ACCEPT:
+      case O_OBSERVE:
       case O_MAX_AGE:
       case O_SIZE1:
         break;
@@ -312,15 +324,15 @@ int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
     return coap_serializer_add_opt(s, opt, NULL, 0);
   }
   if (val < 256) {
-    uint8_t nbo_val = (uint8_t)val;
-    return coap_serializer_add_opt(s, opt, (const char*)&nbo_val, 1);
+    nbo8 = (uint8_t)val;
+    return coap_serializer_add_opt(s, opt, (const char*)&nbo8, 1);
   }
   if (val < 65536) {
-    uint16_t nbo_val = htons((uint16_t)val);
-    return coap_serializer_add_opt(s, opt, (const char*)&nbo_val, 2);
+    nbo16 = htons((uint16_t)val);
+    return coap_serializer_add_opt(s, opt, (const char*)&nbo16, 2);
   }
-  uint32_t nbo_val = htonl(val);
-  return coap_serializer_add_opt(s, opt, (const char*)&nbo_val, 4);
+  nbo32 = htonl(val);
+  return coap_serializer_add_opt(s, opt, (const char*)&nbo32, 4);
 }
 
 int coap_serializer_exec(coap_serializer* s, uint16_t mid, const char* token,
@@ -361,16 +373,7 @@ int coap_parser_create(coap_parser** p, const char* buf, size_t len) {
     return COAP_ERR_ARG;
   }
   *p = (coap_parser*)buf;
-  (*p)->buf_len = 0;
-  (*p)->buf = NULL;
-  (*p)->cursor = 0;
-  (*p)->executed = 0;
-  (*p)->cookie = NULL;
-  (*p)->on_begin = NULL;
-  (*p)->on_header = NULL;
-  (*p)->on_opt = NULL;
-  (*p)->on_payload = NULL;
-  (*p)->on_complete = NULL;
+  memset(*p, 0, sizeof(coap_parser));
   return COAP_OK;
 }
 
@@ -521,9 +524,17 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
             return COAP_ERR_SYNTAX;
           }
           break;
+        case O_OBSERVE:
+          if (opt_len > 3) {
+            return COAP_ERR_SYNTAX;
+          }
+          if (opt == 0) {
+            return COAP_ERR_SYNTAX;
+          }
+          break;
         case O_MAX_AGE:
         case O_SIZE1:
-          if (opt_len > 4 || opt_len == 3) {
+          if (opt_len > 4) {
             return COAP_ERR_SYNTAX;
           }
           if (opt == 0) {
