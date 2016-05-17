@@ -17,7 +17,7 @@ extern "C" {
 /**
  * CoAP serializer.
  */
-struct coap_serializer {
+struct coap_serializer_t {
   size_t buf_len;
   char* buf;
   size_t cursor;
@@ -30,7 +30,7 @@ struct coap_serializer {
 /**
  * CoAP parser.
  */
-struct coap_parser {
+struct coap_parser_t {
   size_t buf_len;
   const char* buf;
   size_t cursor;

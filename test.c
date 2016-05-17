@@ -7,11 +7,11 @@
 #define L(x) (sizeof(x) - 1)
 
 void test_coap_serializer_size() {
-  coap_serializer* s = NULL;
+  coap_serializer_t* s = NULL;
   char buf[2048] = {};
   size_t size = coap_serializer_size();
   assert(size > 0);
-  printf("sizeof(coap_serializer) = %zd\n", size);
+  printf("sizeof(coap_serializer_t) = %zd\n", size);
   assert(coap_serializer_create(&s, malloc(size), size, buf, 2048) == COAP_OK);
   free(s);
   return;
@@ -28,7 +28,7 @@ void test_coap_serializer_create() {
 }
 
 void test_coap_serializer_init_request() {
-  coap_serializer* s = NULL;
+  coap_serializer_t* s = NULL;
   char buf[2048] = {};
   coap_serializer_create(&s, malloc(coap_serializer_size()),
                          coap_serializer_size(), buf, 2048);
@@ -53,7 +53,7 @@ void test_coap_serializer_init_request() {
 }
 
 void test_coap_serializer_init_response_2xx() {
-  coap_serializer* s = NULL;
+  coap_serializer_t* s = NULL;
   char buf[2048] = {};
   coap_serializer_create(&s, malloc(coap_serializer_size()),
                          coap_serializer_size(), buf, 2048);
@@ -85,7 +85,7 @@ void test_coap_serializer_init_response_2xx() {
 }
 
 void test_coap_serializer_init_response_4xx() {
-  coap_serializer* s = NULL;
+  coap_serializer_t* s = NULL;
   char buf[2048] = {};
   coap_serializer_create(&s, malloc(coap_serializer_size()),
                          coap_serializer_size(), buf, 2048);
@@ -147,7 +147,7 @@ void test_coap_serializer_init_response_4xx() {
 }
 
 void test_coap_serializer_init_response_5xx() {
-  coap_serializer* s = NULL;
+  coap_serializer_t* s = NULL;
   char buf[2048] = {};
   coap_serializer_create(&s, malloc(coap_serializer_size()),
                          coap_serializer_size(), buf, 2048);
@@ -189,10 +189,10 @@ void test_coap_serializer_init_response_5xx() {
 }
 
 void test_coap_parser_size() {
-  coap_parser* p = NULL;
+  coap_parser_t* p = NULL;
   size_t size = coap_parser_size();
   assert(size > 0);
-  printf("sizeof(coap_parser) = %zd\n", size);
+  printf("sizeof(coap_parser_t) = %zd\n", size);
   assert(coap_parser_create(&p, malloc(size), size) == COAP_OK);
   free(p);
   return;
@@ -201,8 +201,8 @@ void test_coap_parser_size() {
 void test_coap_sample_readme() {
   char buf[64] = {};
   char token = 0x20;
-  coap_serializer* s = NULL;
-  coap_parser* p = NULL;
+  coap_serializer_t* s = NULL;
+  coap_parser_t* p = NULL;
   const char* payload = NULL;
   size_t payload_len = 0;
   size_t msg_size = 0;

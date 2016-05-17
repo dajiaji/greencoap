@@ -65,7 +65,8 @@ static int validate_type_code_(uint8_t type, uint8_t code) {
   return 0;
 }
 
-static int coap_s_write_(coap_serializer* s, const char* src, size_t src_len) {
+static int coap_s_write_(coap_serializer_t* s, const char* src,
+                         size_t src_len) {
   if (s->buf_len - s->cursor < src_len) {
     return -1;
   }
@@ -74,19 +75,19 @@ static int coap_s_write_(coap_serializer* s, const char* src, size_t src_len) {
   return 0;
 }
 
-static int coap_s_write_uint8_(coap_serializer* s, uint8_t src) {
+static int coap_s_write_uint8_(coap_serializer_t* s, uint8_t src) {
   return coap_s_write_(s, (const char*)&src, 1);
 }
 
-static int coap_s_write_uint16_(coap_serializer* s, uint16_t src) {
+static int coap_s_write_uint16_(coap_serializer_t* s, uint16_t src) {
   return coap_s_write_(s, (const char*)&src, 2);
 }
 
-static int coap_s_write_uint32_(coap_serializer* s, uint32_t src) {
+static int coap_s_write_uint32_(coap_serializer_t* s, uint32_t src) {
   return coap_s_write_(s, (const char*)&src, 4);
 }
 
-static int coap_p_read_(coap_parser* p, char* dst, size_t dst_len) {
+static int coap_p_read_(coap_parser_t* p, char* dst, size_t dst_len) {
   if (p->buf_len - p->cursor < dst_len) {
     return -1;
   }
@@ -95,23 +96,20 @@ static int coap_p_read_(coap_parser* p, char* dst, size_t dst_len) {
   return 0;
 }
 
-int coap_serializer_create(coap_serializer** s, void* buf, size_t len,
+int coap_serializer_create(coap_serializer_t** s, void* buf, size_t len,
                            char* dst_buf, size_t dst_len) {
-  if (buf == NULL || sizeof(coap_serializer) > len || dst_buf == NULL ||
+  if (buf == NULL || sizeof(coap_serializer_t) > len || dst_buf == NULL ||
       dst_len < COAP_LEN_HEADER) {
     return COAP_ERR_ARG;
   }
-  *s = (coap_serializer*)buf;
+  *s = (coap_serializer_t*)buf;
+  memset(*s, 0, sizeof(coap_serializer_t));
   (*s)->buf_len = dst_len;
   (*s)->buf = dst_buf;
-  (*s)->cursor = 0;
-  (*s)->sum_of_delta = 0;
-  (*s)->token_len = 0;
-  (*s)->executed = 0;
   return COAP_OK;
 }
 
-int coap_serializer_init(coap_serializer* s, uint8_t type, uint8_t code,
+int coap_serializer_init(coap_serializer_t* s, uint8_t type, uint8_t code,
                          uint8_t token_len) {
   if (s == NULL || token_len > COAP_MAXLEN_TOKEN) {
     return COAP_ERR_ARG;
@@ -132,7 +130,7 @@ int coap_serializer_init(coap_serializer* s, uint8_t type, uint8_t code,
   return COAP_OK;
 }
 
-int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
+int coap_serializer_add_opt(coap_serializer_t* s, uint16_t opt, const char* val,
                             size_t len) {
   /**
   +-----+---+---+---+---+----------------+--------+--------+----------+
@@ -265,18 +263,18 @@ int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
     opt_delta_and_len |= 14;
   }
   if (coap_s_write_uint8_(s, opt_delta_and_len)) {
-    goto error;
+    return COAP_ERR_LIMIT;
   }
 
   // Option Delta (extended)
   if (opt - s->sum_of_delta < 13) {
   } else if (opt - s->sum_of_delta <= 255 + 13) {
     if (coap_s_write_uint8_(s, (opt - s->sum_of_delta) - 13)) {
-      goto error;
+      return COAP_ERR_LIMIT;
     }
   } else {
     if (coap_s_write_uint16_(s, (opt - s->sum_of_delta) - 269)) {
-      goto error;
+      return COAP_ERR_LIMIT;
     }
   }
 
@@ -284,25 +282,23 @@ int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
   if (len < 13) {
   } else if (len <= 255 + 13) {
     if (coap_s_write_uint8_(s, len - 13)) {
-      goto error;
+      return COAP_ERR_LIMIT;
     }
   } else {
     if (coap_s_write_uint16_(s, len - 269)) {
-      goto error;
+      return COAP_ERR_LIMIT;
     }
   }
 
   // Option Value
   if (coap_s_write_(s, val, len)) {
-    goto error;
+    return COAP_ERR_LIMIT;
   }
   s->sum_of_delta = opt;
   return COAP_OK;
-error:
-  return COAP_ERR_LIMIT;
 }
 
-int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
+int coap_serializer_add_opt_uint(coap_serializer_t* s, uint16_t opt,
                                  uint32_t val) {
   uint8_t nbo8;
   uint16_t nbo16;
@@ -335,7 +331,7 @@ int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
   return coap_serializer_add_opt(s, opt, (const char*)&nbo32, 4);
 }
 
-int coap_serializer_exec(coap_serializer* s, uint16_t mid, const char* token,
+int coap_serializer_exec(coap_serializer_t* s, uint16_t mid, const char* token,
                          const char* payload, size_t payload_len,
                          size_t* msg_len) {
   uint16_t nbo_mid = htons(mid);
@@ -368,16 +364,16 @@ int coap_serializer_exec(coap_serializer* s, uint16_t mid, const char* token,
   return COAP_OK;
 }
 
-int coap_parser_create(coap_parser** p, const char* buf, size_t len) {
-  if (buf == NULL || sizeof(coap_parser) > len) {
+int coap_parser_create(coap_parser_t** p, const char* buf, size_t len) {
+  if (buf == NULL || sizeof(coap_parser_t) > len) {
     return COAP_ERR_ARG;
   }
-  *p = (coap_parser*)buf;
-  memset(*p, 0, sizeof(coap_parser));
+  *p = (coap_parser_t*)buf;
+  memset(*p, 0, sizeof(coap_parser_t));
   return COAP_OK;
 }
 
-int coap_parser_init(coap_parser* p, const coap_parser_settings* s) {
+int coap_parser_init(coap_parser_t* p, const coap_parser_settings_t* s) {
   if (p == NULL) {
     return COAP_ERR_ARG;
   }
@@ -399,7 +395,7 @@ int coap_parser_init(coap_parser* p, const coap_parser_settings* s) {
   return COAP_OK;
 }
 
-int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
+int coap_parser_exec(coap_parser_t* p, const char* buf, size_t len) {
   uint32_t header;
   if (p == NULL || buf == NULL || len == 0) {
     return COAP_ERR_ARG;
@@ -585,7 +581,7 @@ int coap_parser_exec(coap_parser* p, const char* buf, size_t len) {
   return COAP_OK;
 }
 
-int coap_parser_get_type(const coap_parser* p, coap_type_t* res) {
+int coap_parser_get_type(const coap_parser_t* p, coap_type_t* res) {
   if (p == NULL) {
     return COAP_ERR_ARG;
   }
@@ -596,7 +592,7 @@ int coap_parser_get_type(const coap_parser* p, coap_type_t* res) {
   return COAP_OK;
 }
 
-int coap_parser_get_code(const coap_parser* p, coap_code_t* res) {
+int coap_parser_get_code(const coap_parser_t* p, coap_code_t* res) {
   if (p == NULL) {
     return COAP_ERR_ARG;
   }
@@ -607,7 +603,7 @@ int coap_parser_get_code(const coap_parser* p, coap_code_t* res) {
   return COAP_OK;
 }
 
-int coap_parser_get_mid(const coap_parser* p, uint16_t* res) {
+int coap_parser_get_mid(const coap_parser_t* p, uint16_t* res) {
   if (p == NULL) {
     return COAP_ERR_ARG;
   }
@@ -618,7 +614,7 @@ int coap_parser_get_mid(const coap_parser* p, uint16_t* res) {
   return COAP_OK;
 }
 
-int coap_parser_get_token(const coap_parser* p, const char** res,
+int coap_parser_get_token(const coap_parser_t* p, const char** res,
                           uint8_t* len) {
   if (p == NULL) {
     return COAP_ERR_ARG;
@@ -635,7 +631,8 @@ int coap_parser_get_token(const coap_parser* p, const char** res,
   return COAP_OK;
 }
 
-int coap_parser_get_path(const coap_parser* p, const char** res, size_t* len) {
+int coap_parser_get_path(const coap_parser_t* p, const char** res,
+                         size_t* len) {
   if (p == NULL) {
     return COAP_ERR_ARG;
   }
@@ -645,7 +642,7 @@ int coap_parser_get_path(const coap_parser* p, const char** res, size_t* len) {
   return COAP_OK;
 }
 
-int coap_parser_get_payload(const coap_parser* p, const char** res,
+int coap_parser_get_payload(const coap_parser_t* p, const char** res,
                             size_t* len) {
   if (p == NULL) {
     return COAP_ERR_ARG;
@@ -658,5 +655,5 @@ int coap_parser_get_payload(const coap_parser* p, const char** res,
   return COAP_OK;
 }
 
-size_t coap_serializer_size() { return sizeof(coap_serializer); }
-size_t coap_parser_size() { return sizeof(coap_parser); }
+size_t coap_serializer_size() { return sizeof(coap_serializer_t); }
+size_t coap_parser_size() { return sizeof(coap_parser_t); }

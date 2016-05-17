@@ -85,6 +85,8 @@ typedef enum coap_opt_number_t {
   O_URI_QUERY = 15,
   O_ACCEPT = 17,
   O_LOCATION_QUERY = 20,
+  O_BLOCK2 = 23,
+  O_BLOCK1 = 27,
   O_PROXY_URI = 35,
   O_PROXY_SCHEME = 39,
   O_SIZE1 = 60,
@@ -95,10 +97,10 @@ typedef enum coap_opt_number_t {
 } coap_opt_number_t;
 
 /** CoAP serializer */
-typedef struct coap_serializer coap_serializer;
+typedef struct coap_serializer_t coap_serializer_t;
 
 /** CoAP parser */
-typedef struct coap_parser coap_parser;
+typedef struct coap_parser_t coap_parser_t;
 
 /** CoAP parser callback functions */
 typedef void (*coap_parser_cb_t)(void*);
@@ -108,93 +110,95 @@ typedef void (*coap_parser_cb_opt_t)(void*, uint16_t, const void*, uint16_t);
 typedef void (*coap_parser_cb_payload_t)(void*, const char*, size_t);
 
 /** CoAP parser */
-typedef struct coap_parser_settings {
+typedef struct coap_parser_settings_t {
   void* cookie;
   coap_parser_cb_t on_begin;
   coap_parser_cb_header_t on_header;
   coap_parser_cb_opt_t on_opt;
   coap_parser_cb_payload_t on_payload;
   coap_parser_cb_t on_complete;
-} coap_parser_settings;
+} coap_parser_settings_t;
 
 /**
- * Create a CoAP serializer (coap_serializer) with fixed size memory space.
+ * Create a CoAP serializer with fixed size memory space.
  */
-int coap_serializer_create(coap_serializer** s, void* buf, size_t len,
+int coap_serializer_create(coap_serializer_t** s, void* buf, size_t len,
                            char* dst_buf, size_t dst_len);
 
 /**
- * Initialize a CoAP serializer with a CoAP header and a token.
+ * Initialize the CoAP serializer with message type, code and token
+ * length.
  */
-int coap_serializer_init(coap_serializer* s, uint8_t type, uint8_t code,
+int coap_serializer_init(coap_serializer_t* s, uint8_t type, uint8_t code,
                          uint8_t token_len);
 
 /**
  * Add an option.
  */
-int coap_serializer_add_opt(coap_serializer* s, uint16_t opt, const char* val,
+int coap_serializer_add_opt(coap_serializer_t* s, uint16_t opt, const char* val,
                             size_t len);
 /**
  * Add a uint option.
  */
-int coap_serializer_add_opt_uint(coap_serializer* s, uint16_t opt,
+int coap_serializer_add_opt_uint(coap_serializer_t* s, uint16_t opt,
                                  uint32_t val);
 
 /**
- * Execute (Finalize) the CoAP serializer with a payload.
+ * Execute (Finalize) the CoAP serializer with message id, token, and payload.
  */
-int coap_serializer_exec(coap_serializer* s, uint16_t mid, const char* token,
+int coap_serializer_exec(coap_serializer_t* s, uint16_t mid, const char* token,
                          const char* payload, size_t payload_len,
                          size_t* msg_len);
 
 /**
- * Create a CoAP parser (coap_parser) with fixed size memory space.
+ * Create a CoAP parser (coap_parser_t) with fixed size memory space.
  */
-int coap_parser_create(coap_parser** p, const char* buf, size_t len);
+int coap_parser_create(coap_parser_t** p, const char* buf, size_t len);
 
 /**
- * Initialize a CoAP parser (coap_parser) with fixed size memory space.
+ * Initialize a CoAP parser (coap_parser_t) with fixed size memory space.
  */
-int coap_parser_init(coap_parser* p, const coap_parser_settings* s);
+int coap_parser_init(coap_parser_t* p, const coap_parser_settings_t* s);
 
 /**
  * Parse a given buffer as a CoAP message.
  */
-int coap_parser_exec(coap_parser* p, const char* buf, size_t len);
+int coap_parser_exec(coap_parser_t* p, const char* buf, size_t len);
 
 /**
  * Get the CoAP message type.
  */
-int coap_parser_get_type(const coap_parser* p, coap_type_t* res);
+int coap_parser_get_type(const coap_parser_t* p, coap_type_t* res);
 
 /**
  * Get the CoAP message code.
  */
-int coap_parser_get_code(const coap_parser* p, coap_code_t* res);
+int coap_parser_get_code(const coap_parser_t* p, coap_code_t* res);
 
 /**
  * Get the CoAP message id.
  */
-int coap_parser_get_mid(const coap_parser* p, uint16_t* res);
+int coap_parser_get_mid(const coap_parser_t* p, uint16_t* res);
 
 /**
  * Get the CoAP message token.
  */
-int coap_parser_get_token(const coap_parser* p, const char** res, uint8_t* len);
+int coap_parser_get_token(const coap_parser_t* p, const char** res,
+                          uint8_t* len);
 
 /**
  * Get the value of path.
  */
-int coap_parser_get_path(const coap_parser* p, const char** buf, size_t* len);
+int coap_parser_get_path(const coap_parser_t* p, const char** buf, size_t* len);
 
 /**
  * Get a CoAP message payload.
  */
-int coap_parser_get_payload(const coap_parser* p, const char** buf,
+int coap_parser_get_payload(const coap_parser_t* p, const char** buf,
                             size_t* len);
 
 /**
- * Get the size of coap_serializer.
+ * Get the size of coap_serializer_t.
  */
 size_t coap_serializer_size();
 

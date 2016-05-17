@@ -7,6 +7,7 @@ Features:
 * Support following specifications related to CoAP.
   * RFC7252: "The Constained Application Protocol" <http://tools.ietf.org/html/rfc7252>
   * RFC7649: "Observing Resources in Constrained Application Protocol (CoAP)"  <http://tools.ietf.org/html/rfc7649>
+  * draft-ietf-core-block-20: "Block-wise transfers in CoAP" <https://tools.ietf.org/html/draft-ietf-core-block-20>
 * Support static memory allocation. (No need to use malloc.)
 * No dependencies.
 * Small footprint.
@@ -20,9 +21,9 @@ char token = 0x20;
 size_t res_len = 0;
 const char* res = NULL;
 
-// How to use coap_serializer.
-coap_serializer* s = NULL;
-coap_serializer_create(&s, malloc(coap_serializer_size()), coap_serializer_size(), buf, 64);
+// How to use coap_serializer_t.
+coap_serializer_t* s = NULL;
+coap_serializer_create(&s, malloc(coap_serializer_t_size()), coap_serializer_t_size(), buf, 64);
 coap_serializer_init(s, T_CON, C_POST, 1);
 coap_serializer_add_opt(s, O_URI_HOST, "example.com", sizeof("example.com")-1);
 coap_serializer_add_opt_uint(s, O_URI_PORT, 5683);
