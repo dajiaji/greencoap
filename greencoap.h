@@ -96,6 +96,16 @@ typedef enum coap_opt_number_t {
   // RESERVED = 140,
 } coap_opt_number_t;
 
+/**
+ * CoAP media types.
+ */
+const uint16_t F_TEXT_PLAIN = 0;
+const uint16_t F_APPLICATION_LINK_FORMAT = 40;
+const uint16_t F_APPLICATION_XML = 41;
+const uint16_t F_APPLICATION_OCTET_STREAM = 42;
+const uint16_t F_APPLICATION_EXI = 47;
+const uint16_t F_APPLICATION_JSON = 50;
+
 /** CoAP serializer */
 typedef struct coap_serializer_t coap_serializer_t;
 
