@@ -1,7 +1,51 @@
-#include "greencoap_i.h"
-#include <stdio.h>
+#if defined(TARGET_LIKE_MBED)
+#include "sal-stack-lwip/lwip/include/lwip/def.h"
+#else
 #include <arpa/inet.h>
+#endif
+#include <assert.h>
+#include <stdio.h>
 #include <string.h>
+#include "greencoap.h"
+
+#define COAP_VERSION (1 << 30)
+#define COAP_LEN_HEADER 4
+#define COAP_MAXLEN_TOKEN 8
+
+/**
+ * CoAP serializer.
+ */
+struct coap_serializer_t {
+  size_t buf_len;
+  char* buf;
+  size_t cursor;
+  size_t payload;
+  uint16_t sum_of_delta;
+  uint8_t token_len;
+  uint8_t executed;
+};
+
+/**
+ * CoAP parser.
+ */
+struct coap_parser_t {
+  size_t buf_len;
+  const char* buf;
+  size_t cursor;
+  size_t payload;
+  uint8_t version;
+  uint8_t type;
+  uint8_t code;
+  uint16_t mid;
+  uint8_t token_len;
+  uint8_t executed;
+  void* cookie;
+  coap_parser_cb_t on_begin;
+  coap_parser_cb_header_t on_header;
+  coap_parser_cb_opt_t on_opt;
+  coap_parser_cb_payload_t on_payload;
+  coap_parser_cb_t on_complete;
+};
 
 static uint8_t is_well_known_(uint16_t opt) {
   if (opt <= 255) return 1;
